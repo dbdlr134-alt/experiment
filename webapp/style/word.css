@@ -1,0 +1,75 @@
+@charset "UTF-8";
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+:root {
+    --mnu-blue: #0C4DA1;
+    --mnu-green: #00A295;
+    --bg-color: #F4F6F9;
+    --card-bg: #FFFFFF;
+    --text-dark: #333333;
+    --text-gray: #666666;
+    --shadow: 0 4px 15px rgba(12, 77, 161, 0.08);
+}
+
+* { box-sizing: border-box; font-family: 'Noto Sans KR', sans-serif; }
+body { background-color: var(--bg-color); color: var(--text-dark); margin: 0; }
+
+/* 1. 단어 상세 카드 */
+.word-detail-container {
+    max-width: 700px; margin: 60px auto; padding: 0 20px;
+}
+
+.word-card {
+    background: var(--card-bg); padding: 50px 40px;
+    border-radius: 20px; box-shadow: var(--shadow);
+    text-align: center; border-top: 6px solid var(--mnu-blue);
+}
+
+.card-header {
+    color: var(--mnu-blue); font-weight: 700; font-size: 16px;
+    margin-bottom: 30px; letter-spacing: 1px; text-transform: uppercase;
+}
+
+/* 2. 단어 정보 영역 */
+.word-title-area {
+    border-bottom: 2px solid #f0f0f0; padding-bottom: 25px; margin-bottom: 30px;
+}
+
+.word-text {
+    font-size: 52px; font-weight: 800; color: var(--text-dark); margin-bottom: 15px;
+}
+
+.jlpt-badge {
+    background-color: #e0f2f1; color: var(--mnu-green);
+    padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 700;
+    display: inline-block;
+}
+
+.info-group { margin-bottom: 25px; text-align: left; padding: 0 20px; }
+.info-label {
+    display: block; font-size: 14px; color: #888; margin-bottom: 5px; font-weight: 500;
+}
+.info-value {
+    font-size: 22px; color: #444; font-weight: 500;
+}
+.info-value.korean { font-weight: 700; color: var(--mnu-blue); font-size: 26px; }
+
+/* 3. 버튼 그룹 */
+.btn-group {
+    margin-top: 40px; display: flex; justify-content: center; gap: 10px;
+}
+
+.btn-action {
+    padding: 12px 24px; border-radius: 25px; font-size: 14px; font-weight: 600;
+    text-decoration: none; transition: 0.2s; border: none; cursor: pointer;
+}
+
+.btn-gray { background-color: #f5f5f5; color: #666; }
+.btn-gray:hover { background-color: #e0e0e0; color: #333; }
+
+.btn-blue { background-color: var(--mnu-blue); color: white; }
+.btn-blue:hover { background-color: #0a3d82; }
+
+.btn-orange { background-color: #fff3e0; color: #ef6c00; }
+.btn-orange:hover { background-color: #ffe0b2; }

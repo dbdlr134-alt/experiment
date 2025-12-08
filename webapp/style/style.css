@@ -1,0 +1,300 @@
+@charset "UTF-8";
+
+/* ========================================= */
+/* 1. MNU Color Theme & Reset                */
+/* ========================================= */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+:root {
+    --mnu-green: #00A295;       /* 포인트, 버튼, 링크 호버 */
+    --mnu-blue: #0C4DA1;        /* 헤더, 타이틀, 중요 강조 */
+    --bg-color: #FFFFFF;        /* 기본 배경 */
+    --section-bg: #F9FAFB;      /* 섹션 배경 (아주 연한 회색) */
+    --text-dark: #333333;
+    --text-gray: #666666;
+    --border-color: #E0E0E0;
+    --shadow: 0 8px 20px rgba(12, 77, 161, 0.08); /* 부드러운 그림자 */
+    --chart-color-correct: #00A295; /* 정답 (초록) */
+    --chart-color-wrong: #FF6B6B;   /* 오답 (빨강) */
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Noto Sans KR', sans-serif; }
+body { background-color: var(--bg-color); color: var(--text-dark); }
+a { text-decoration: none; color: inherit; transition: 0.2s; }
+ul { list-style: none; }
+button { font-family: 'Noto Sans KR', sans-serif; cursor: pointer; }
+
+/* 레이아웃 공통 */
+.inner { width: 100%; max-width: 1100px; margin: 0 auto; padding: 0 20px; position: relative; }
+.center-box { display: flex; justify-content: center; width: 100%; }
+
+
+/* ========================================= */
+/* 2. 헤더 스타일 (Header)                   */
+/* ========================================= */
+/* (헤더는 앞서 드린 header.jsp와 호환되도록 기본만 잡습니다) */
+.top-header {
+    height: 70px; background: #fff; border-bottom: 1px solid var(--border-color);
+    display: flex; align-items: center; position: sticky; top: 0; z-index: 1000;
+}
+.logo a { font-size: 24px; font-weight: 800; color: var(--mnu-blue); letter-spacing: -0.5px; }
+
+
+/* ========================================= */
+/* 3. 검색 섹션 (Search Section) - 네이버 스타일 */
+/* ========================================= */
+.search-section {
+    background-color: #fff;
+    padding: 80px 0 60px; text-align: center;
+}
+
+.title-area h1 { font-size: 42px; font-weight: 700; color: var(--mnu-blue); margin-bottom: 10px; letter-spacing: -1px; }
+.sub-title { color: var(--text-gray); font-size: 16px; margin-bottom: 40px; font-weight: 300; }
+
+.search-box { 
+    width: 100%; max-width: 650px; margin: 0 auto; position: relative; 
+}
+
+.search-input {
+    width: 100%; height: 60px;
+    border: 2px solid var(--mnu-green); /* MNU Green 테두리 */
+    border-radius: 30px;
+    padding: 0 85px 0 25px;
+    font-size: 18px; outline: none; transition: 0.3s;
+    box-shadow: 0 4px 10px rgba(0, 162, 149, 0.1);
+}
+.search-input:focus { box-shadow: 0 4px 15px rgba(0, 162, 149, 0.2); }
+
+.search-btn {
+    position: absolute; right: 5px; top: 5px;
+    width: 75px; height: 50px;
+    background-color: var(--mnu-green); color: #fff;
+    border: none; border-radius: 25px;
+    font-size: 16px; font-weight: 700;
+    transition: 0.2s;
+}
+.search-btn:hover { background-color: #00857a; }
+
+
+/* ========================================= */
+/* 4. 메인 컨텐츠 (Cards)                    */
+/* ========================================= */
+.daily-section {
+    background-color: var(--section-bg);
+    padding: 60px 0 100px;
+}
+
+.card-container {
+    display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; width: 100%;
+}
+
+.card {
+    background: #fff; border-radius: 16px;
+    padding: 40px; text-align: center;
+    box-shadow: var(--shadow);
+    width: 48%; min-width: 320px;
+    border: 1px solid #fff; transition: 0.3s;
+}
+.card:hover { transform: translateY(-5px); border-color: var(--mnu-green); }
+
+.card-header {
+    font-size: 15px; font-weight: 700; color: var(--mnu-blue);
+    margin-bottom: 25px; text-transform: uppercase; letter-spacing: 1px;
+    border-bottom: 2px solid #f0f0f0; padding-bottom: 15px; display: inline-block;
+}
+
+/* 퀴즈 카드 내부 */
+.quiz-question { font-size: 36px; font-weight: 700; color: var(--text-dark); margin-bottom: 10px; }
+.quiz-desc { color: var(--text-gray); font-size: 15px; margin-bottom: 30px; }
+
+/* JLPT 버튼 스타일 (Green Outline) */
+.btn-level {
+    display: inline-block; padding: 10px 16px; margin: 4px;
+    border: 1px solid #ddd; border-radius: 20px;
+    color: var(--text-gray); background: #fff; font-size: 14px; font-weight: 600;
+    transition: 0.2s;
+}
+.btn-level:hover {
+    border-color: var(--mnu-green); color: #fff; background-color: var(--mnu-green);
+}
+
+/* 메인 액션 버튼 (Blue Solid) */
+.btn-action {
+    display: inline-block; padding: 12px 30px; border-radius: 25px;
+    font-weight: 700; font-size: 15px; text-decoration: none; border: none;
+    transition: 0.3s; cursor: pointer;
+}
+.btn-action.peri {
+    background-color: var(--mnu-blue); color: #fff;
+    box-shadow: 0 4px 10px rgba(12, 77, 161, 0.2);
+}
+.btn-action.peri:hover { background-color: #093a7a; box-shadow: 0 6px 15px rgba(12, 77, 161, 0.3); }
+
+
+/* ========================================= */
+/* 5. 검색 결과 리스트 (Result List)         */
+/* ========================================= */
+.result-list { width: 100%; list-style: none; }
+.result-item {
+    background: #fff; padding: 25px; margin-bottom: 15px;
+    border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+    border: 1px solid transparent; transition: 0.2s;
+}
+.result-item a { display: block; }
+.result-item:hover { border-color: var(--mnu-green); transform: translateX(5px); }
+
+.result-item .word { font-size: 24px; font-weight: 700; color: var(--mnu-blue); margin-right: 8px; }
+.result-item .doc { font-size: 15px; color: #777; margin-right: 10px; }
+.result-item .korean { display: block; margin-top: 8px; font-size: 16px; color: #333; }
+.result-item .jlpt {
+    display: inline-block; margin-top: 10px;
+    background-color: #e0f2f1; color: var(--mnu-green);
+    font-size: 12px; padding: 3px 8px; border-radius: 4px; font-weight: 700;
+}
+
+.no-result { text-align: center; padding: 60px 0; color: #999; font-size: 16px; }
+
+/* =========================================
+   헤더 드롭다운 메뉴 스타일 (추가)
+   ========================================= */
+
+/* 1. 메뉴 버튼 (:::) 스타일 */
+.btn-menu {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    text-decoration: none;
+    cursor: pointer;
+    margin-left: 15px;
+    padding: 5px;
+}
+
+/* 2. 드롭다운 박스 (기본: 숨김 상태) */
+.dropdown-content {
+    /* 배치 관련 (기존 유지) */
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background-color: #fff;
+    min-width: 200px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    border: 1px solid #eee;
+    z-index: 9999;
+    overflow: hidden;
+
+    /* ★ [수정] 애니메이션 초기 상태 설정 */
+    opacity: 0;                     /* 완전히 투명하게 */
+    visibility: hidden;             /* 화면에서 클릭 안 되게 숨김 */
+    transform: translateY(-20px);   /* 위쪽으로 20px 올려둠 (내려오는 효과를 위해) */
+    
+    /* ★ [수정] 부드러운 움직임 설정 (0.3초 동안 변함) */
+    transition: all 0.3s ease;      
+}
+
+/* 3. 자바스크립트가 붙여줄 클래스 (보임 상태) */
+.show {
+    /* ★ [수정] display: block 대신 아래 속성 사용 */
+    opacity: 1;                     /* 불투명하게 (보임) */
+    visibility: visible;            /* 클릭 가능하게 */
+    transform: translateY(0);       /* 원래 위치로 스르륵 내려옴 */
+}
+
+/* 4. 드롭다운 내부 메뉴 아이템 */
+.dropdown-content .menu-profile-area {
+    padding: 20px;
+    background: #f9f9f9;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+}
+.dropdown-content .menu-item {
+    display: block;
+    padding: 12px 20px;
+    text-decoration: none;
+    color: #333;
+    border-bottom: 1px solid #f5f5f5;
+    font-size: 14px;
+    transition: 0.2s;
+}
+.dropdown-content .menu-item:hover {
+    background-color: #f1f1f1;
+    color: #00A295; /* 포인트 색상 */
+}
+.dropdown-content .menu-msg {
+    padding: 15px;
+    text-align: center;
+    color: #888;
+    font-size: 13px;
+    background: #f9f9f9;
+}
+
+/* 5. (참고) 헤더 우측 정렬을 위한 부모 속성 */
+/* 헤더의 .util-nav에 position: relative가 있어야 드롭다운 위치가 잘 잡힘 */
+.util-nav {
+    position: relative; 
+    display: flex;
+    align-items: center;
+}
+
+/* =========================================
+   헤더 레이아웃 정렬 수정 (왼쪽 로고 / 오른쪽 메뉴)
+   ========================================= */
+
+/* 1. 헤더 내부 컨테이너 정렬 */
+.top-header .inner {
+    display: flex;              /* 가로 배치 시작 */
+    justify-content: space-between; /* 로고는 왼쪽 끝, 메뉴는 오른쪽 끝으로 밀어냄 */
+    align-items: center;        /* 수직 중앙 정렬 */
+    width: 1200px;              /* (기존 inner 너비 유지) */
+    margin: 0 auto;             /* 가운데 정렬 */
+    height: 100%;               /* 높이 꽉 채우기 */
+}
+
+/* 2. 오른쪽 유틸리티 메뉴 (로그인 + :::) 정렬 */
+.util-nav {
+    display: flex;              /* 내부 요소들도 가로로 배치 */
+    align-items: center;        /* 수직 중앙 정렬 */
+    gap: 15px;                  /* 로그인 글자와 ::: 버튼 사이 간격 */
+}
+
+/* 3. (혹시 모를 충돌 방지) 로고 스타일 */
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+/* =========================================
+   헤더 로그인 정보 디자인 수정 (정렬 및 폰트)
+   ========================================= */
+
+/* 1. 프로필 사진과 글자를 감싸는 박스 */
+.user-info-bar {
+    display: flex;              /* 가로 배치 */
+    align-items: center;        /* ★ 핵심: 수직 중앙 정렬 (위아래 가운데로) */
+    gap: 10px;                  /* 사진과 글자 사이 간격 벌리기 */
+    padding: 5px 10px;          /* 전체적인 여백 살짝 추가 */
+}
+
+/* 2. "환영합니다 OO님" 글자 스타일 */
+.user-info-bar span {
+    font-size: 16px;            /* 글자 크기 키움 (기본 14px -> 16px) */
+    color: #444;                /* 가독성 좋은 진한 회색 */
+    font-weight: 500;           /* 적당한 굵기 */
+    line-height: 1;             /* 불필요한 줄간격 제거 (정렬 방해 방지) */
+}
+
+/* 3. 이름(strong 태그) 부분 강조 */
+.user-info-bar strong {
+    font-size: 17px;            /* 이름은 조금 더 크게 */
+    color: #000;                /* 이름은 완전 검정색 */
+    margin-right: 2px;          /* '님' 글자와 살짝 띄우기 */
+}
+
+/* 4. 프로필 이미지 미세 조정 (기존 인라인 스타일 덮어쓰기) */
+.user-info-bar img {
+    width: 38px !important;     /* 사진 크기도 균형 맞게 살짝 키움 (기존 32px) */
+    height: 38px !important;
+    border-radius: 50%;
+    border: 2px solid #eee;     /* 테두리 추가해서 깔끔하게 */
+    object-fit: cover;
+}
