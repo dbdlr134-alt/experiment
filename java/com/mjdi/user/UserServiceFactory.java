@@ -46,6 +46,8 @@ public class UserServiceFactory {
             action = new MessageBoxService();
         }else if (cmd.equals("/userBlock.do")) {
             action = new UserBlockService();
+        }else if (cmd.equals("/checkForbidden.do")) {//회원가입시 금지어
+            action = new UserForbiddenCheckService();
         }else if (cmd.equals("/themeBuy.do")) {
             action = new ThemeBuyService();
         }else if (cmd.equals("/themeApply.do")) {

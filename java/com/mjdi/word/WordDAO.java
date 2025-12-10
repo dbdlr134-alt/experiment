@@ -147,4 +147,32 @@ public class WordDAO {
         } catch (Exception e) { e.printStackTrace(); }
         return count;
     }
+    
+    /**
+     * [트랜잭션용] 단어 등록
+     * Connection을 외부에서 받아 처리하며 close() 하지 않음.
+     */
+    public int insertWordWithConn(Connection conn, WordDTO dto) {
+        int result = 0;
+        PreparedStatement pstmt = null;
+        // 테이블명과 컬럼명은 실제 DB에 맞춰주세요
+        String sql = "INSERT INTO jdi_word (word, doc, korean, jlpt) VALUES (?, ?, ?, ?)";
+
+        try {
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, dto.getWord());
+            pstmt.setString(2, dto.getDoc());
+            pstmt.setString(3, dto.getKorean());
+            pstmt.setString(4, dto.getJlpt());
+            
+            result = pstmt.executeUpdate();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 0 반환 시 서비스에서 롤백
+        } finally {
+            if (pstmt != null) try { pstmt.close(); } catch (Exception e) {}
+        }
+        return result;
+    }
 }

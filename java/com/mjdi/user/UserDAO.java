@@ -42,34 +42,34 @@ public class UserDAO {
         return result;
     }
 
-    // 2. 로그인 (★수정됨: 테마 정보 가져오기)
+    // 2. 로그인 (★ jdi_status 추가 조회)
     public UserDTO loginCheck(String id, String pw) {
         UserDTO user = null;
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
         String sql = "SELECT * FROM jdi_login WHERE jdi_user = ? AND jdi_pass = ?";
-        try (Connection conn = DBM.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try {
+            conn = DBM.getConnection();
+            pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, id);
             pstmt.setString(2, SHA256.encodeSha256(pw));
-            try(ResultSet rs = pstmt.executeQuery()) {
-                if(rs.next()) {
-                    user = new UserDTO();
-                    user.setJdi_user(rs.getString("jdi_user"));
-                    user.setJdi_name(rs.getString("jdi_name"));
-                    user.setJdi_email(rs.getString("jdi_email"));
-                    user.setJdi_phone(rs.getString("jdi_phone"));
-                    user.setJdi_profile(rs.getString("jdi_profile"));
-                    user.setJdi_role(rs.getString("jdi_role"));
-                    
-                    // 상태 (없으면 ACTIVE)
-                    String status = rs.getString("jdi_status");
-                    user.setJdi_status(status == null ? "ACTIVE" : status);
-                    
-                    // ★ [핵심 수정] 테마 정보 가져오기 (없으면 default)
-                    String theme = rs.getString("jdi_theme");
-                    user.setJdi_theme(theme == null ? "default" : theme);
-                }
+            rs = pstmt.executeQuery();
+            if(rs.next()) {
+                user = new UserDTO();
+                user.setJdi_user(rs.getString("jdi_user"));
+                user.setJdi_name(rs.getString("jdi_name"));
+                user.setJdi_email(rs.getString("jdi_email"));
+                user.setJdi_phone(rs.getString("jdi_phone"));
+                user.setJdi_profile(rs.getString("jdi_profile"));
+                user.setJdi_role(rs.getString("jdi_role"));
+                
+                // ★ [추가] 상태값 가져오기 (없으면 기본값 ACTIVE)
+                String status = rs.getString("jdi_status");
+                user.setJdi_status(status == null ? "ACTIVE" : status);
             }
         } catch (Exception e) { e.printStackTrace(); } 
+        finally { DBM.close(conn, pstmt, rs); }
         return user;
     }
 
@@ -225,8 +225,27 @@ public class UserDAO {
         } catch (Exception e) { e.printStackTrace(); }
         return result;
     }
+    
+    
+    // ★ [추가] 금지어 리스트 가져오기
+    public ArrayList<String> getForbiddenWords() {
+        ArrayList<String> list = new ArrayList<>();
+        String sql = "SELECT word FROM forbidden_names";
 
-    // 13. 보유 테마 목록 조회 (기존 코드 유지)
+        try (Connection conn = DBM.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                list.add(rs.getString("word"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+    
     public ArrayList<String> getMyThemes(String userId) {
         ArrayList<String> list = new ArrayList<>();
         list.add("default"); // 기본 테마는 항상 포함
@@ -270,11 +289,12 @@ public class UserDAO {
         return result;
     }
 
-    // 16. ★ [신규] 상점 진열용 전체 테마 목록 조회
     public ArrayList<ThemeDTO> getAllThemes() {
         ArrayList<ThemeDTO> list = new ArrayList<>();
-        // 판매 중인(Y) 테마만 가져오기
-        String sql = "SELECT * FROM jdi_theme_info WHERE is_active = 'Y' ORDER BY price ASC";
+        
+        // [수정 1] SQL 변경
+        // 판매 중(Y)인 것과 시크릿(AY)인 것을 모두 가져옵니다. (N은 제외)
+        String sql = "SELECT * FROM jdi_theme_info WHERE is_active IN ('Y', 'A') ORDER BY price ASC";
         
         try (Connection conn = DBM.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -286,9 +306,98 @@ public class UserDAO {
                 dto.setThemeName(rs.getString("theme_name"));
                 dto.setPrice(rs.getInt("price"));
                 dto.setDescription(rs.getString("description"));
+                
+                // [수정 2] is_active 값을 DTO에 담아야 JSP에서 'AY'인지 확인 가능
+                dto.setIsActive(rs.getString("is_active"));
+                
                 list.add(dto);
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) { 
+            e.printStackTrace(); 
+        }
         return list;
+    }
+    
+    public int buyThemeWithConn(Connection conn, String userId, String themeCode) {
+        int result = 0;
+        String sql = "INSERT INTO jdi_my_theme (jdi_user, theme_code) VALUES (?, ?)";
+        
+        // try-with-resources 사용 (pstmt만 닫음)
+        try (java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, userId);
+            pstmt.setString(2, themeCode);
+            result = pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 서비스(Service)에서 롤백할 수 있도록 예외를 던지거나, 
+            // 0을 리턴하여 실패를 알림 (여기서는 0 리턴 방식 사용)
+        }
+        return result;
+    }
+    
+    public int updateAllWithConn(Connection conn, String id, String name, String phone, String email, String newPw, String profile) {
+        int result = 0;
+        java.sql.PreparedStatement pstmt = null;
+        StringBuilder sql = new StringBuilder();
+        
+        // 비밀번호 변경 여부에 따라 쿼리가 달라질 수 있음
+        // newPw가 비어있으면(null or "") 비밀번호는 수정하지 않음
+        boolean updatePw = (newPw != null && !newPw.trim().isEmpty());
+
+        sql.append("UPDATE jdi_user SET ");
+        sql.append("jdi_name=?, jdi_phone=?, jdi_email=?, jdi_profile=? ");
+        if (updatePw) {
+            sql.append(", jdi_pw=? ");
+        }
+        sql.append("WHERE jdi_user=?");
+
+        try {
+            pstmt = conn.prepareStatement(sql.toString());
+            int idx = 1;
+            pstmt.setString(idx++, name);
+            pstmt.setString(idx++, phone);
+            pstmt.setString(idx++, email);
+            pstmt.setString(idx++, profile);
+            
+            if (updatePw) {
+                pstmt.setString(idx++, newPw); // 암호화 필요 시 여기서 처리
+            }
+            
+            pstmt.setString(idx++, id); // WHERE 절 조건
+            
+            result = pstmt.executeUpdate();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 서비스에서 롤백하도록 예외를 던지거나 0 리턴
+        } finally {
+            // Connection은 닫지 않고 Statement만 닫음
+            if (pstmt != null) try { pstmt.close(); } catch(Exception e) {}
+        }
+        
+        return result;
+    }
+    
+    public int updateProfileWithConn(Connection conn, String userId, String profilePath) {
+        int result = 0;
+        PreparedStatement pstmt = null;
+        String sql = "UPDATE jdi_user SET jdi_profile = ? WHERE jdi_user = ?";
+
+        try {
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, profilePath);
+            pstmt.setString(2, userId);
+            
+            result = pstmt.executeUpdate();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 에러 발생 시 0 반환 (Service에서 이를 감지하여 rollback 처리)
+        } finally {
+            // 주의: conn.close()는 하지 않고, pstmt만 닫습니다.
+            if (pstmt != null) try { pstmt.close(); } catch (Exception e) {}
+        }
+        
+        return result;
     }
 }

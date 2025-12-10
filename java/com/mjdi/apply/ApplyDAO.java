@@ -283,4 +283,28 @@ public class ApplyDAO {
         } catch (Exception e) { e.printStackTrace(); }
         return count;
     }
+    
+    /**
+     * [트랜잭션용] 신청 상태 변경
+     * Connection을 외부에서 받아 처리하며 close() 하지 않음.
+     */
+    public int updateStatusWithConn(Connection conn, int reqId, String status) {
+        int result = 0;
+        PreparedStatement pstmt = null;
+        String sql = "UPDATE word_apply SET status = ? WHERE req_id = ?";
+
+        try {
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, status);
+            pstmt.setInt(2, reqId);
+            
+            result = pstmt.executeUpdate();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (pstmt != null) try { pstmt.close(); } catch (Exception e) {}
+        }
+        return result;
+    }
 }

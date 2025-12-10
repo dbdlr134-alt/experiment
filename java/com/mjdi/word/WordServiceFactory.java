@@ -22,8 +22,6 @@ public class WordServiceFactory {
             action = new WordAutoCompleteService();
         } else if (cmd.equals("word_req")) {
             action = new WordReqService();
-        } else if (cmd.equals("use_point")) {
-            action = new PointUseService();
         }else if (cmd.equals("bookmark_toggle")) {
             action = new BookmarkToggleService();
         } else if (cmd.equals("bookmark_list")) {

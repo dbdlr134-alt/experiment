@@ -86,4 +86,27 @@ public class ProfileReqDAO {
             e.printStackTrace();
         }
     }
+    
+    public int updateStatusWithConn(Connection conn, int reqId, String status) {
+        int result = 0;
+        PreparedStatement pstmt = null;
+        String sql = "UPDATE profile_request SET status=? WHERE req_id=?";
+
+        try {
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, status);
+            pstmt.setInt(2, reqId);
+            
+            result = pstmt.executeUpdate();
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 에러 발생 시 0 반환
+        } finally {
+            // Connection은 닫지 않고 PreparedStatement만 닫습니다.
+            if (pstmt != null) try { pstmt.close(); } catch (Exception e) {}
+        }
+        
+        return result;
+    }
 }

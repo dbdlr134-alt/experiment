@@ -13,23 +13,17 @@ public class PointDAO {
     private static PointDAO instance = new PointDAO();
     public static PointDAO getInstance() { return instance; }
     
-    // 1. 포인트 적립/사용 메서드
-    // 예: dao.addPoint("test01", 10, "퀴즈 정답");
-    public int addPoint(String id, int amount, String reason) {
+    public int addPoint(Connection conn, String id, int amount, String reason) throws Exception {
         int result = 0;
-        Connection conn = null;
-        PreparedStatement pstmt = null;
         String sql = "INSERT INTO jdi_point_log (jdi_user, amount, reason) VALUES (?, ?, ?)";
         
-        try {
-            conn = DBM.getConnection();
-            pstmt = conn.prepareStatement(sql);
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, id);
             pstmt.setInt(2, amount);
             pstmt.setString(3, reason);
             result = pstmt.executeUpdate();
-        } catch(Exception e) { e.printStackTrace(); }
-        finally { DBM.close(conn, pstmt); }
+        } 
+        // 여기서 catch를 하지 않고 Exception을 던져서 Service가 Rollback 할 수 있게 합니다.
         return result;
     }
     

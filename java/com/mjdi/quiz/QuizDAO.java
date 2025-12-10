@@ -20,6 +20,57 @@ public class QuizDAO {
     private QuizDAO() {}
     private static QuizDAO instance = new QuizDAO();
     public static QuizDAO getInstance() { return instance; }
+    
+ // 1. [트랜잭션용] 오답노트 추가 (중복 방지 로직 포함 권장)
+    public void addIncorrectNoteWithConn(Connection conn, String userId, int quizId) {
+        // 이미 있는지 확인하는 로직이 있으면 좋지만, 여기서는 INSERT IGNORE나 MERGE 등을 가정하거나 단순 INSERT
+        // 중복 에러가 날 수 있으니 try-catch로 감싸서 무시하거나, MERGE INTO 구문 사용 권장
+        String sql = "INSERT INTO jdi_incorrect_note (jdi_user, quiz_id) VALUES (?, ?)"; 
+        PreparedStatement pstmt = null;
+        try {
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, userId);
+            pstmt.setInt(2, quizId);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            // 이미 존재할 경우(PK 중복 등) 예외가 날 수 있음 -> 무시하고 진행
+        } finally {
+            if(pstmt != null) try { pstmt.close(); } catch(Exception e) {}
+        }
+    }
+
+    // 2. [트랜잭션용] 오답노트 삭제 (복습 성공 시)
+    public void removeIncorrectNoteWithConn(Connection conn, String userId, int quizId) {
+        String sql = "DELETE FROM jdi_incorrect_note WHERE jdi_user=? AND quiz_id=?";
+        PreparedStatement pstmt = null;
+        try {
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, userId);
+            pstmt.setInt(2, quizId);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if(pstmt != null) try { pstmt.close(); } catch(Exception e) {}
+        }
+    }
+
+    // 3. [트랜잭션용] 문제 풀이 횟수 증가
+    public void updateSolveCountWithConn(Connection conn, String userId, int count) {
+        // 예: jdi_user_stats 테이블이 있다고 가정
+        String sql = "UPDATE jdi_user SET solve_count = solve_count + ? WHERE jdi_user = ?";
+        PreparedStatement pstmt = null;
+        try {
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, count);
+            pstmt.setString(2, userId);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if(pstmt != null) try { pstmt.close(); } catch(Exception e) {}
+        }
+    }
 
     // ==========================================================
     // 1. JLPT 급수별 퀴즈 랜덤 생성 (japanese_word 테이블 활용)
