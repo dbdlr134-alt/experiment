@@ -1,14 +1,39 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="com.mjdi.user.UserDTO" %>
+
+<%
+    // ==== ✅ 테마 기반 CSS 로딩 설정 ====
+    UserDTO myUser = (UserDTO)session.getAttribute("sessionUser");
+    String ctx = request.getContextPath();
+
+    String currentTheme = "default";
+    if (myUser != null && myUser.getJdi_theme() != null && !myUser.getJdi_theme().trim().isEmpty()) {
+        currentTheme = myUser.getJdi_theme();
+    }
+
+    String baseCss   = ctx + "/style/style.css";   // 공통 레이아웃
+    String userCss   = ctx + "/style/user.css";    // 회원/폼 공통
+    String themeCss  = null;                       // 테마 (있을 때만)
+
+    if (!"default".equals(currentTheme)) {
+        themeCss = ctx + "/style/" + currentTheme + "/style.css";
+    }
+%>
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <title>단어 등록 신청 - My J-Dic</title>
 
-    <!-- ✅ 공통 레이아웃 & 헤더 스타일 -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/style/style.css">
-    <!-- ✅ 폼 디자인 관련 -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/style/user.css">
+    <!-- ✅ 공통 레이아웃 & 폼 스타일 -->
+    <link rel="stylesheet" href="<%= baseCss %>">
+    <link rel="stylesheet" href="<%= userCss %>">
+
+    <!-- ✅ 테마 CSS (default가 아닐 때만) -->
+    <% if (themeCss != null) { %>
+        <link rel="stylesheet" href="<%= themeCss %>">
+    <% } %>
 </head>
 <body>
 
@@ -25,7 +50,7 @@
             </p>
 
             <!-- ✅ 단어 등록 신청 폼 -->
-            <form action="${pageContext.request.contextPath}/request.apply" method="post" class="auth-form">
+            <form action="<%= ctx %>/request.apply" method="post" class="auth-form">
                 <div class="input-group">
                     <label class="input-label" for="word">단어 (한자/히라가나)</label>
                     <input type="text" id="word" name="word"

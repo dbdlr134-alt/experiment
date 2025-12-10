@@ -51,8 +51,21 @@
             
             <ul class="menu-list">
                 <li>
+                    <a href="<%= ctx %>/NoticeController?cmd=notice_write" class="menu-item">
+                        <span>📢 공지사항 <strong>작성</strong></span>
+                        <span class="arrow">›</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="<%= ctx %>/NoticeController?cmd=notice_list" class="menu-item">
+                        <span>📢 공지사항 <strong>관리</strong></span>
+                        <span class="arrow">›</span>
+                    </a>
+                </li>
+
+                <li>
                     <a href="<%= ctx %>/adminList.apply" class="menu-item">
-                        <span>📢 단어 <strong>신규 등록</strong> 신청 관리</span>
+                        <span>📖 단어 <strong>신규 등록</strong> 신청 관리</span>
                         <span class="arrow">›</span>
                     </a>
                 </li>
@@ -62,19 +75,26 @@
                         <span class="arrow">›</span>
                     </a>
                 </li>
+
                 <li>
                     <a href="<%= ctx %>/userList.do" class="menu-item">
                         <span>👥 회원 목록 조회 및 관리</span>
                         <span class="arrow">›</span>
                     </a>
                 </li>
-                <!-- ✅ 새로 추가된 메뉴: 프로필 이미지 변경 신청 관리 -->
                 <li>
                     <a href="<%= ctx %>/profileReqList.do" class="menu-item">
                         <span>🖼️ 프로필 <strong>이미지 변경</strong> 신청 관리</span>
                         <span class="arrow">›</span>
                     </a>
                 </li>
+                
+                <li>		
+			        <a href="<%= ctx %>/QnAController?cmd=admin_qna_list" class="menu-item">
+			            <span>❓ <strong>Q&A 문의</strong> 관리 (답변 작성)</span>
+			            <span class="arrow">›</span>
+			        </a>
+			    </li>
             </ul>
         </div>
         

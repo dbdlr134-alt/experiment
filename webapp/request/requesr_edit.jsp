@@ -1,6 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="com.mjdi.word.WordDAO" %>
-<%@ page import="com.mjdi.word.WordDTO" %>
+<%@ page import="com.mjdi.word.WordDAO, com.mjdi.word.WordDTO, com.mjdi.user.UserDTO" %>
 
 <%
     // 로그인 체크
@@ -27,6 +26,24 @@
         response.getWriter().write("<script>alert('존재하지 않는 단어입니다.'); history.back();</script>");
         return;
     }
+
+    // ==== ✅ 테마 기반 CSS 로딩 설정 ====
+    UserDTO myUser = (UserDTO)session.getAttribute("sessionUser");
+    String ctx = request.getContextPath();
+
+    String currentTheme = "default";
+    if (myUser != null && myUser.getJdi_theme() != null && !myUser.getJdi_theme().trim().isEmpty()) {
+        currentTheme = myUser.getJdi_theme();
+    }
+
+    String baseCss   = ctx + "/style/style.css";     // 공통 레이아웃
+    String userCss   = ctx + "/style/user.css";      // 회원/폼 공통
+    String reqCss    = ctx + "/style/request.css";   // 신청/요청 폼 전용
+    String themeCss  = null;                         // 테마 (있을 때만)
+
+    if (!"default".equals(currentTheme)) {
+        themeCss = ctx + "/style/" + currentTheme + "/style.css";
+    }
 %>
 
 <!DOCTYPE html>
@@ -35,11 +52,15 @@
     <meta charset="UTF-8">
     <title>단어 수정 신청 - My J-Dic</title>
 
-    <!-- ✅ 공통 레이아웃 & 헤더 스타일 -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/style/style.css">
-    <!-- ✅ 폼 디자인 관련 -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/style/user.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/style/request.css">
+    <!-- ✅ 공통 레이아웃 & 폼 스타일 -->
+    <link rel="stylesheet" href="<%= baseCss %>">
+    <link rel="stylesheet" href="<%= userCss %>">
+    <link rel="stylesheet" href="<%= reqCss %>">
+
+    <!-- ✅ 테마 CSS (default가 아닌 경우만) -->
+    <% if (themeCss != null) { %>
+        <link rel="stylesheet" href="<%= themeCss %>">
+    <% } %>
 </head>
 <body>
 
@@ -56,15 +77,13 @@
             </p>
 
             <!-- ✅ 단어 수정 신청 폼 -->
-            <!-- action 경로는 ApplyController가 처리하도록 설정 -->
-            <form action="${pageContext.request.contextPath}/requestEdit.apply" method="post" class="auth-form">
+            <form action="<%= ctx %>/requestEdit.apply" method="post" class="auth-form">
                 
                 <!-- 수정 대상 단어 ID (수정 불가, hidden) -->
                 <input type="hidden" name="word_id" value="<%= word.getWord_id() %>">
 
                 <div class="form-group">
                     <label class="form-label">단어 (한자/히라가나)</label>
-                    <!-- 기존 값을 value에 넣어주어 수정하기 편하게 함 -->
                     <input type="text" name="word" class="form-input" 
                            value="<%= word.getWord() %>" required>
                 </div>

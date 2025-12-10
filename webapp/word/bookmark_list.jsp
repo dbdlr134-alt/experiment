@@ -1,12 +1,41 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"
+    import="com.mjdi.user.UserDTO" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+<%
+    // 세션에서 유저 정보 가져오기
+    UserDTO myUser = (UserDTO)session.getAttribute("sessionUser");
+
+    // 현재 테마 결정
+    String currentTheme = "default";
+    if (myUser != null && myUser.getJdi_theme() != null && !myUser.getJdi_theme().trim().isEmpty()) {
+        currentTheme = myUser.getJdi_theme();
+    }
+
+    // 공통 스타일 + 테마 스타일 경로
+    String ctx      = request.getContextPath();
+    String baseCss  = ctx + "/style/style.css";           // 공통 레이아웃
+    String userCss  = ctx + "/style/user.css";            // 마이페이지/북마크 전용
+    String themeCss = null;                               // 테마 (있을 때만)
+    if (!"default".equals(currentTheme)) {
+        themeCss = ctx + "/style/" + currentTheme + "/style.css";
+    }
+%>
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <title>나만의 단어장 - My J-Dic</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/style/style.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/style/user.css">
+
+    <!-- 1) 항상 공통 style.css -->
+    <link rel="stylesheet" href="<%= baseCss %>">
+    <!-- 2) 마이페이지/북마크 전용 user.css -->
+    <link rel="stylesheet" href="<%= userCss %>">
+    <!-- 3) 테마가 default가 아닐 때만 색/변수 덮어쓰기 -->
+    <% if (themeCss != null) { %>
+        <link rel="stylesheet" href="<%= themeCss %>">
+    <% } %>
 </head>
 <body class="bookmark-page">
     <jsp:include page="/include/header.jsp" />
@@ -16,15 +45,15 @@
             <div>
                 <h2 class="bookmark-title">📔 나만의 즐겨찾기 단어장</h2>
                 <p class="bookmark-count">
-				    <c:choose>
-				        <c:when test="${not empty bookmarkList}">
-				            총 <strong>${bookmarkList.size()}</strong>개의 즐겨찾기 단어가 있습니다.
-				        </c:when>
-				        <c:otherwise>
-				            아직 즐겨찾기한 단어가 없습니다.
-				        </c:otherwise>
-				    </c:choose>
-				</p>
+                    <c:choose>
+                        <c:when test="${not empty bookmarkList}">
+                            총 <strong>${bookmarkList.size()}</strong>개의 즐겨찾기 단어가 있습니다.
+                        </c:when>
+                        <c:otherwise>
+                            아직 즐겨찾기한 단어가 없습니다.
+                        </c:otherwise>
+                    </c:choose>
+                </p>
             </div>
         </div>
 

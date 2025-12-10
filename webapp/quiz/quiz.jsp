@@ -1,5 +1,16 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page import="com.mjdi.user.UserDTO" %>
+
+<%
+    // 1. 세션에서 유저 정보 가져오기 (없으면 테마는 default)
+    UserDTO myUser = (UserDTO)session.getAttribute("sessionUser");
+
+    String cssPath = request.getContextPath() + "/style/style.css"; // 기본 테마
+    if (myUser != null && myUser.getJdi_theme() != null && !"default".equals(myUser.getJdi_theme())) {
+        cssPath = request.getContextPath() + "/style/" + myUser.getJdi_theme() + "/style.css";
+    }
+%>
 
 <!DOCTYPE html>
 <html lang="ko">
@@ -7,10 +18,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>퀴즈 풀기 - My J-Dic</title>
+
+    <!-- 레이아웃/퀴즈 전용 스타일 먼저 -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/style/quiz.css">
-	<link rel="stylesheet" href="${pageContext.request.contextPath}/style/style.css">
-	
-	<link rel="stylesheet" href="${pageContext.request.contextPath}/style/style.css?ver=3">
+    <!-- 마지막에 테마 CSS 적용 (현재 테마에 따라 경로 변경) -->
+    <link rel="stylesheet" href="<%= cssPath %>">
 </head>
 <body>
 
