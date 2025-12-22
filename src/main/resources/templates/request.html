@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>단어 신청 관리</title>
+    <style>
+        body { margin:0; font-family:'Noto Sans KR', sans-serif; background:#f3f4f6; color:#111827; }
+        header { background: linear-gradient(135deg, #0C4DA1, #00A295); color:white; padding:22px; text-align:center; box-shadow:0 6px 20px rgba(0,0,0,0.12);}        
+        header h1 { margin:0; font-size:24px; }
+        .container { max-width: 960px; margin: 20px auto; padding: 0 18px; }
+        .card { background:#fff; border-radius:16px; box-shadow:0 10px 24px rgba(0,0,0,0.08); padding:20px; }
+        table { width:100%; border-collapse:collapse; }
+        th, td { padding:10px; border-bottom:1px solid #f1f5f9; text-align:left; }
+        th { color:#6b7280; font-weight:600; font-size:13px; }
+        .badge { display:inline-block; padding:4px 8px; border-radius:8px; font-size:12px; background:#e0f2f1; color:#0f766e; }
+        .actions { display:flex; gap:6px; }
+        .btn { padding:8px 12px; border-radius:8px; border:none; cursor:pointer; }
+        .btn.approve { background:#0C4DA1; color:white; }
+        .btn.reject { background:#ef4444; color:white; }
+        .empty { text-align:center; color:#6b7280; padding:18px 0; }
+        .nav { margin-bottom:12px; }
+        .nav a { color:#0C4DA1; text-decoration:none; font-weight:600; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>단어 신청 관리</h1>
+    </header>
+
+    <div class="container">
+        <div class="nav">
+            <a th:href="@{/word}">← 검색으로 돌아가기</a>
+        </div>
+        <section class="card">
+            <div th:if="${msg}" style="margin-bottom:12px; padding:10px 12px; border-radius:10px; background:#ecfeff; color:#0f766e; border:1px solid #99f6e4;" th:text="${msg}"></div>
+            <table th:if="${pendingRequests != null && #lists.size(pendingRequests) > 0}">
+                <thead>
+                    <tr>
+                        <th>구분</th>
+                        <th>단어</th>
+                        <th>뜻</th>
+                        <th>요청자</th>
+                        <th>처리</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="req : ${pendingRequests}">
+                        <td><span class="badge" th:text="${req.requestType}"></span></td>
+                        <td th:text="${req.word}"></td>
+                        <td th:text="${req.korean}"></td>
+                        <td th:text="${req.requestedBy}"></td>
+                        <td>
+                            <div class="actions">
+                                <form th:action="@{'/word/requests/' + ${req.id} + '/approve'}" method="post">
+                                    <button class="btn approve" type="submit">승인</button>
+                                </form>
+                                <form th:action="@{'/word/requests/' + ${req.id} + '/reject'}" method="post">
+                                    <button class="btn reject" type="submit">반려</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="empty" th:if="${pendingRequests == null || #lists.size(pendingRequests) == 0}">
+                대기 중인 신청이 없습니다.
+            </div>
+        </section>
+    </div>
+</body>
+</html>

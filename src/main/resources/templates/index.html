@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>MyJapanDic - 일본어 학습 커뮤니티</title>
+    <style>
+        body { margin: 0; font-family: 'Noto Sans KR', sans-serif; background: #f6f7fb; color: #333; }
+        header {
+            background: linear-gradient(135deg, #0C4DA1, #00A295);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+        }
+        header h1 { margin: 0; font-size: 36px; font-weight: 800; letter-spacing: -1px; }
+        header p { margin: 10px 0 0; color: #e6f6ff; font-size: 18px; }
+        
+        .container { max-width: 1000px; margin: -30px auto 60px; padding: 0 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-decoration: none;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            height: 200px;
+            border: 1px solid #e5e7eb;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.12); border-color: #0C4DA1; }
+        
+        .card-icon { font-size: 48px; margin-bottom: 16px; }
+        .card h2 { margin: 0; font-size: 22px; color: #0C4DA1; }
+        .card p { margin: 8px 0 0; color: #6b7280; font-size: 14px; }
+        
+        .auth-box {
+            background: white;
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .user-info { font-weight: bold; color: #333; }
+        .btn-group a { text-decoration: none; padding: 10px 18px; border-radius: 10px; font-size: 14px; font-weight: 600; margin-left: 8px; }
+        .btn-login { background: #0C4DA1; color: white; }
+        .btn-join { background: #fff; color: #0C4DA1; border: 1px solid #0C4DA1; }
+        .btn-logout { background: #fee2e2; color: #b91c1c; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🇯🇵 MyJapanDic</h1>
+        <p>함께 만드는 일본어 단어장 & 커뮤니티</p>
+    </header>
+
+    <div class="container">
+        <div class="auth-box">
+            <div sec:authorize="isAnonymous()">
+                <span class="user-info">로그인하고 더 많은 기능을 이용해보세요!</span>
+            </div>
+            <div sec:authorize="isAnonymous()" class="btn-group">
+                <a th:href="@{/auth/login}" class="btn-login">로그인</a>
+                <a th:href="@{/auth/join}" class="btn-join">회원가입</a>
+            </div>
+
+            <div sec:authorize="isAuthenticated()">
+                <span class="user-info">
+                    안녕하세요, <span sec:authentication="name">사용자</span>님! 👋
+                </span>
+            </div>
+            <div sec:authorize="isAuthenticated()" class="btn-group">
+                <a th:href="@{/profile}" style="background:#f3f4f6; color:#333;">내 정보</a>
+                <a th:href="@{/auth/logout}" class="btn-logout">로그아웃</a>
+            </div>
+        </div>
+
+        <div class="grid">
+            <a th:href="@{/word}" class="card">
+                <div class="card-icon">🔍</div>
+                <h2>단어 검색</h2>
+                <p>단어, 뜻, JLPT 급수로 검색하고<br>나만의 단어장을 만드세요.</p>
+            </a>
+
+            <a th:href="@{/board}" class="card">
+                <div class="card-icon">💬</div>
+                <h2>커뮤니티</h2>
+                <p>일본어 공부 팁을 공유하고<br>자유롭게 이야기해요.</p>
+            </a>
+
+            <a th:href="@{/word/requests}" class="card">
+                <div class="card-icon">✍️</div>
+                <h2>단어 추가 신청</h2>
+                <p>없는 단어가 있나요?<br>직접 등록을 신청해보세요.</p>
+            </a>
+
+            <a th:href="@{/themes}" class="card">
+                <div class="card-icon">🎨</div>
+                <h2>테마 상점</h2>
+                <p>포인트로 나만의 테마를<br>꾸며보세요.</p>
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>

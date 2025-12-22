@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>일본어 사전 - 검색</title>
+    <style>
+        :root {
+            --primary: #0C4DA1;
+            --accent: #00A295;
+            --border: #e5e7eb;
+            --text: #333;
+            --muted: #888;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #f6f7fb;
+            color: var(--text);
+        }
+        header {
+            background: linear-gradient(135deg, #0C4DA1, #00A295);
+            color: white;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+        }
+        header h1 { margin: 0; font-size: 28px; }
+        header p { margin: 6px 0 0; color: #e6f6ff; }
+        .container { max-width: 1100px; margin: -40px auto 60px; padding: 0 20px; }
+        .search-card {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            padding: 28px;
+            position: relative;
+        }
+        .search-form { position: relative; }
+        .search-input {
+            width: 100%;
+            padding: 16px 18px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            font-size: 16px;
+            outline: none;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.04);
+        }
+        .search-btn {
+            position: absolute; right: 8px; top: 8px;
+            height: 44px; min-width: 110px;
+            border: none; border-radius: 12px;
+            background: var(--primary); color: white; font-weight: bold;
+            cursor: pointer; box-shadow: 0 8px 16px rgba(12,77,161,0.25);
+        }
+        .alert {
+            margin-top: 14px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            background: #fff2e5;
+            color: #b45309;
+            border: 1px solid #fcd9a6;
+        }
+        .layout { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-top: 18px; }
+        @media (max-width: 960px) { .layout { grid-template-columns: 1fr; } }
+        .card {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        }
+        .card h3 { margin-top: 0; margin-bottom: 12px; font-size: 18px; }
+        .result-list { list-style: none; padding: 0; margin: 0; }
+        .result-item { border-bottom: 1px solid #f0f2f5; }
+        .result-link {
+            display: flex; flex-direction: column; gap: 6px;
+            padding: 14px 10px; text-decoration: none; color: var(--text);
+            transition: 0.2s ease;
+        }
+        .result-link:hover { background: #f7fbff; transform: translateY(-1px); }
+        .word-row { display: flex; align-items: center; gap: 8px; }
+        .word { font-size: 20px; font-weight: 700; color: var(--primary); }
+        .doc { color: var(--muted); }
+        .korean { font-size: 16px; font-weight: 600; }
+        .jlpt { margin-left: auto; background: #e8f1ff; color: var(--primary); padding: 4px 10px; border-radius: 10px; font-size: 12px; }
+        .empty { text-align: center; color: var(--muted); padding: 26px 12px; }
+        .actions { display: flex; gap: 8px; margin-top: 12px; }
+        .btn { display: inline-flex; justify-content: center; align-items: center; gap: 6px; border: 1px solid var(--border); color: var(--text); text-decoration: none; padding: 10px 14px; border-radius: 10px; font-size: 14px; background: #fff; }
+        .btn.primary { background: var(--primary); color: white; border: none; box-shadow: 0 8px 16px rgba(12,77,161,0.2); }
+        .btn.accent { background: var(--accent); color: white; border: none; box-shadow: 0 8px 16px rgba(0,162,149,0.2); }
+        .auto-box { position: absolute; top: 56px; left: 0; right: 0; background: white; border: 1px solid var(--border); border-radius: 0 0 12px 12px; box-shadow: 0 12px 30px rgba(0,0,0,0.1); display: none; z-index: 20; overflow: hidden; }
+        .auto-item { padding: 12px 16px; border-bottom: 1px solid #f5f5f5; cursor: pointer; }
+        .auto-item:hover { background: #e8f7ff; }
+        .pagination { display: flex; gap: 8px; align-items: center; justify-content: center; margin-top: 14px; }
+        .pagination a, .pagination span { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); text-decoration: none; color: var(--text); }
+        .pagination .current { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .request-form label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 6px; }
+        .request-form input, .request-form select { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 10px; }
+        .badge { display: inline-block; padding: 4px 8px; background: #f1f5f9; border-radius: 8px; font-size: 12px; color: #475569; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🇯🇵 일본어 단어 검색</h1>
+        <p>검색, 자동완성, 즐겨찾기, 단어 신청까지 한 화면에서 처리하세요.</p>
+    </header>
+
+    <div class="container">
+        <div class="search-card">
+            <form class="search-form" th:action="@{/word}" method="get" autocomplete="off">
+                <input id="searchInput" class="search-input" type="text" name="query" placeholder="단어, 뜻, JLPT 급수를 입력하세요" th:value="${query}">
+                <input type="hidden" name="user" th:value="${user}">
+                <button class="search-btn" type="submit">검색</button>
+                <div id="autoBox" class="auto-box"></div>
+            </form>
+
+            <div th:if="${msg}" class="alert" th:text="${msg}"></div>
+
+            <div class="actions">
+                <a class="btn" th:href="@{/word(user=${user})}">홈으로</a>
+                <a class="btn" th:href="@{/word/bookmarks(user=${user})}">📔 내 즐겨찾기</a>
+                <a class="btn primary" th:href="@{/word/requests}">신청 현황</a>
+            </div>
+        </div>
+
+        <div class="layout">
+            <section class="card">
+                <h3>검색 결과</h3>
+                <p class="badge" th:if="${wordPage}" th:text="${'총 ' + wordPage.totalElements + '건'}"></p>
+
+                <ul class="result-list" th:if="${wordPage != null && wordPage.totalElements > 0}">
+                    <li class="result-item" th:each="word : ${wordPage.content}">
+                        <a class="result-link" th:href="@{'/word/' + ${word.wordId} (user=${user}, from=${query})}">
+                            <div class="word-row">
+                                <span class="word" th:text="${word.word}"></span>
+                                <span class="doc" th:text="${'[' + word.doc + ']'}"></span>
+                                <span class="jlpt" th:text="${word.jlpt}"></span>
+                            </div>
+                            <div class="korean" th:text="${word.korean}"></div>
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="empty" th:if="${wordPage != null && wordPage.totalElements == 0}">
+                    <p th:if="${query}" th:text="${'\'' + query + '\'' + ' 에 대한 검색 결과가 없습니다.'}"></p>
+                    <p th:unless="${query}">검색어를 입력해보세요.</p>
+                </div>
+
+                <div class="pagination" th:if="${wordPage != null && wordPage.totalPages > 1}">
+                    <a th:if="${wordPage.hasPrevious()}" th:href="@{/word(page=${wordPage.number - 1}, query=${query}, user=${user})}">이전</a>
+                    <span class="current" th:text="${wordPage.number + 1}"></span>
+                    <a th:if="${wordPage.hasNext()}" th:href="@{/word(page=${wordPage.number + 1}, query=${query}, user=${user})}">다음</a>
+                </div>
+            </section>
+
+            <aside class="card">
+                <h3>단어 등록 신청</h3>
+                <form class="request-form" th:action="@{/word/requests/new}" method="post" th:object="${requestForm}">
+                    <input type="hidden" th:field="*{requestedBy}">
+                    <label for="word">단어</label>
+                    <input id="word" type="text" th:field="*{word}" placeholder="예: 勉強" required>
+                    <label for="doc">요미가나</label>
+                    <input id="doc" type="text" th:field="*{doc}" placeholder="예: べんきょう" required>
+                    <label for="korean">뜻</label>
+                    <input id="korean" type="text" th:field="*{korean}" placeholder="예: 공부" required>
+                    <label for="jlpt">JLPT 급수</label>
+                    <select id="jlpt" th:field="*{jlpt}" required>
+                        <option value="">선택하세요</option>
+                        <option value="N5">N5</option>
+                        <option value="N4">N4</option>
+                        <option value="N3">N3</option>
+                        <option value="N2">N2</option>
+                        <option value="N1">N1</option>
+                        <option value="기타">기타</option>
+                    </select>
+                    <button class="btn accent" type="submit">신규 등록 신청</button>
+                </form>
+
+                <div style="margin-top:16px;">
+                    <h4 style="margin:0 0 8px;">대기 중인 신청</h4>
+                    <div th:if="${pendingRequests != null && #lists.size(pendingRequests) > 0}">
+                        <div th:each="req : ${pendingRequests}" style="padding:8px 0; border-bottom:1px solid #f1f5f9;">
+                            <div style="font-weight:600;" th:text="${req.word}"></div>
+                            <div style="font-size:13px; color:var(--muted);" th:text="${req.requestType}"></div>
+                        </div>
+                    </div>
+                    <p th:if="${pendingRequests == null || #lists.size(pendingRequests) == 0}" class="empty" style="padding:10px 0;">대기 중인 신청이 없습니다.</p>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const autoBox = document.getElementById('autoBox');
+
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function() {
+                const key = this.value.trim();
+                if (key.length === 0) {
+                    autoBox.style.display = 'none';
+                    autoBox.innerHTML = '';
+                    return;
+                }
+
+                fetch(`/word/autocomplete?key=${encodeURIComponent(key)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        autoBox.innerHTML = '';
+                        if (!data || data.length === 0) {
+                            autoBox.style.display = 'none';
+                            return;
+                        }
+
+                        data.forEach(item => {
+                            const div = document.createElement('div');
+                            div.className = 'auto-item';
+                            div.innerHTML = `<strong>${item.word}</strong> <span style="color:${'var(--muted)'}; font-size:13px;">${item.korean ?? ''}</span>`;
+                            div.addEventListener('click', () => {
+                                searchInput.value = item.word;
+                                autoBox.style.display = 'none';
+                            });
+                            autoBox.appendChild(div);
+                        });
+
+                        autoBox.style.display = 'block';
+                    })
+                    .catch(() => autoBox.style.display = 'none');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (e.target !== searchInput && !autoBox.contains(e.target)) {
+                    autoBox.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
