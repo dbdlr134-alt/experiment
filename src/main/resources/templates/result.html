@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>검색 결과 - MyJapanDic</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --text-main: #111827;
+            --text-sub: #6b7280;
+            --bg-body: #f3f4f6;
+            --bg-card: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 20px;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Pretendard', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .mobile-container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--bg-body);
+            min-height: 100vh;
+            position: relative;
+            padding-bottom: 80px;
+        }
+
+        /* 헤더 */
+        header {
+            background: var(--bg-card);
+            padding: 16px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+        }
+
+        /* 검색바 스타일 */
+        .search-bar-container {
+            flex: 1;
+        }
+        .search-input {
+            width: 100%;
+            padding: 10px 16px;
+            border-radius: 99px;
+            border: 1px solid #e5e7eb;
+            background: #f9fafb;
+            font-size: 14px;
+            outline: none;
+            transition: 0.2s;
+        }
+        .search-input:focus { border-color: var(--primary); background: #fff; }
+
+        /* 결과 리스트 영역 */
+        .content { padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+
+        /* 단어 카드 (리스트 아이템) */
+        .word-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            position: relative;
+            transition: transform 0.2s;
+        }
+        .word-card:active { transform: scale(0.98); }
+
+        .badge {
+            display: inline-block;
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .kanji {
+            font-family: 'Noto Serif JP', serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 4px 0;
+        }
+
+        .reading {
+            font-size: 16px;
+            color: var(--text-sub);
+            margin-bottom: 16px;
+        }
+
+        .meanings {
+            font-size: 18px;
+            font-weight: 600;
+            line-height: 1.5;
+            color: var(--text-main);
+            border-top: 1px solid #f3f4f6;
+            padding-top: 12px;
+        }
+
+        /* 검색 결과 없음 */
+        .no-result {
+            text-align: center;
+            padding-top: 100px;
+            color: var(--text-sub);
+        }
+        .no-result-icon { font-size: 48px; margin-bottom: 16px; display: block; }
+
+        /* 하단 플로팅 버튼 (홈으로) */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+            text-decoration: none;
+            font-size: 24px;
+            z-index: 200;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-container">
+        <header>
+            <a href="/" class="back-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </a>
+            <div class="search-bar-container">
+                <form action="/search" method="get">
+                    <input type="text" name="q" class="search-input" th:value="${keyword}" placeholder="다른 단어 검색...">
+                </form>
+            </div>
+        </header>
+
+        <div class="no-result" th:if="${words.isEmpty()}">
+            <span class="no-result-icon">🤔</span>
+            <h3>검색 결과가 없습니다.</h3>
+            <p>철자를 확인하거나 다른 단어로 검색해보세요.<br>크롤링에도 실패했을 수 있어요.</p>
+        </div>
+
+        <div class="content" th:unless="${words.isEmpty()}">
+            <div class="word-card" th:each="word : ${words}">
+                <span class="badge" th:if="${word.level}" th:text="${word.level}">N1</span>
+                
+                <div class="kanji" th:text="${word.kanji}">漢字</div>
+                
+                <div class="reading" th:text="${word.reading}">かんじ</div>
+                
+                <div class="meanings" th:text="${word.meanings}">뜻이 여기에 나옵니다.</div>
+            </div>
+        </div>
+
+        <a href="/" class="fab">🏠</a>
+    </div>
+
+</body>
+</html>
