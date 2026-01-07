@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>글 상세보기</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="/css/style.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+<header class="blog-header" style="height: 200px;">
+    <h2 class="blog-title" style="font-size: 2rem;">My Bravo Life</h2>
+</header>
+
+<nav class="navbar navbar-expand-lg blog-nav sticky-top">
+    <div class="container-fluid justify-content-center">
+        <ul class="navbar-nav">
+             <li class="nav-item"><a class="nav-link" href="/">홈으로 가기</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container main-box">
+    <input type="hidden" id="boardId" th:value="${post.id}">
+
+    <div class="post-content-wrapper">
+        <div class="d-flex justify-content-between align-items-end mb-3 border-bottom pb-3">
+            <div>
+                <span class="badge bg-secondary mb-2" th:text="${post.boardType}">카테고리</span>
+                <h2 class="fw-bold" th:text="${post.title}">제목입니다</h2>
+                <div class="text-muted" style="font-size: 0.9rem;">
+                    <span th:text="${post.user.nickname}">작성자</span> · 
+                    <span th:text="${#dates.format(post.createDate, 'yyyy-MM-dd HH:mm')}">날짜</span>
+                </div>
+            </div>
+            
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-muted">조회 <span th:text="${post.count}">0</span></span>
+                <button class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1" id="btn-love" style="border-radius: 20px;">
+                    <i class="bi bi-heart-fill"></i> 
+                    좋아요 <span th:text="${post.loves.size()}">0</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="card-text py-4" style="min-height: 200px;" th:utext="${post.content}">
+            내용입니다.
+        </div>
+
+        <div class="d-flex justify-content-end mt-4 pt-3 border-top" 
+             th:if="${post.user.username == #authentication.name}">
+            <a th:href="@{/board/{id}/updateForm(id=${post.id})}" class="btn btn-secondary btn-sm me-2 rounded-pill">수정</a>
+            <button id="btn-delete" class="btn btn-outline-secondary btn-sm rounded-pill">삭제</button>
+        </div>
+    </div>
+
+    <div class="mt-5 bg-light p-3 rounded">
+        <textarea id="reply-content" class="form-control mb-2" rows="2" placeholder="댓글을 남겨주세요"></textarea>
+        <div class="d-flex justify-content-end">
+            <button type="button" id="btn-reply-save" class="btn btn-brown btn-sm rounded-pill px-3">등록</button>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <h6 class="fw-bold border-bottom pb-2">댓글 리스트</h6>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item" th:each="reply : ${post.replys}">
+                <div class="d-flex justify-content-between">
+                    <div class="d-flex align-items-start">
+                        <div class="ms-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <strong th:text="${reply.user.nickname}" style="font-size: 0.95rem;">작성자</strong>
+                                <small class="text-muted" style="font-size: 0.8rem;" 
+                                       th:text="${#dates.format(reply.createDate, 'yyyy-MM-dd HH:mm')}">날짜</small>
+                            </div>
+                            <p class="mb-0 mt-1" th:text="${reply.content}" style="font-size: 0.95rem; white-space: pre-wrap;">댓글 내용</p>
+                        </div>
+                    </div>
+                    
+                    <button th:if="${reply.user.username == #authentication.name}" 
+                            th:onclick="'replyDelete(' + ${post.id} + ',' + ${reply.id} + ')'" 
+                            class="btn btn-link text-danger text-decoration-none p-0" style="font-size: 0.8rem;">삭제</button>
+                </div>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="mt-5 text-center">
+        <a href="/" class="btn btn-outline-secondary rounded-pill px-4">목록으로</a>
+    </div>
+</div>
+
+<script>
+    // 1. 글 삭제
+    $("#btn-delete").click(function() {
+        let id = $("#boardId").val(); 
+        if(!confirm("정말 삭제하시겠습니까?")) return;
+
+        $.ajax({
+            type: "DELETE",
+            url: "/api/board/" + id,
+            dataType: "json"
+        }).done(function(resp) {
+            alert("삭제되었습니다.");
+            location.href = "/";
+        }).fail(function(error) {
+            alert("삭제 실패");
+        });
+    });
+
+    // 2. 댓글 작성
+    $("#btn-reply-save").click(function() {
+        let data = { content: $("#reply-content").val() };
+        let boardId = $("#boardId").val();
+
+        $.ajax({
+            type: "POST",
+            url: `/api/board/${boardId}/reply`,
+            data: JSON.stringify(data),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json"
+        }).done(function(resp) {
+            location.reload();
+        }).fail(function(error) {
+            alert("로그인이 필요합니다");
+            location.href = "/auth/loginForm";
+        });
+    });
+
+    // 3. 댓글 삭제
+    function replyDelete(boardId, replyId) {
+        if(!confirm("댓글을 삭제하시겠습니까?")) return;
+        $.ajax({
+            type: "DELETE",
+            url: `/api/board/${boardId}/reply/${replyId}`,
+            dataType: "json"
+        }).done(function(resp) {
+            location.reload();
+        }).fail(function(error) {
+            alert("댓글삭제 실패");
+        });
+    }
+
+    // 4. 좋아요
+    $("#btn-love").click(function() {
+        let boardId = $("#boardId").val();
+        $.ajax({
+            type: "POST",
+            url: `/api/board/${boardId}/love`,
+            dataType: "json"
+        }).done(function(resp) {
+            location.reload();
+        }).fail(function(error) {
+            alert("로그인이 필요합니다.");
+            location.href = "/auth/loginForm";
+        });
+    });
+</script>
+
+</body>
+</html>

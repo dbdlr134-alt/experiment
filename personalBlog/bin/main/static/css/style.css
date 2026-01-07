@@ -1,0 +1,148 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background-color: #f9f8f4; /* 전체 배경: 연한 아이보리 */
+    color: #555; /* 글자: 부드러운 진회색 */
+    margin: 0;
+}
+
+a { text-decoration: none; color: inherit; }
+
+/* 1. 헤더 (기존 유지) */
+.blog-header {
+    background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), url('/images/header.jpg'); 
+    background-size: cover;
+    background-position: center;
+    height: 350px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #333;
+    text-shadow: 2px 2px 10px rgba(255,255,255,0.8);
+    margin-bottom: 0;
+}
+
+.blog-title { font-size: 3rem; font-weight: 700; margin-bottom: 10px; }
+.blog-subtitle { font-size: 1.2rem; font-weight: 500; }
+
+/* 2. 네비게이션 바 */
+.blog-nav { background-color: #fff; border-bottom: 1px solid #e0e0e0; padding: 10px 0; }
+
+/* 3. 메인 컨텐츠 박스 */
+.container.main-box {
+    background-color: #fff;
+    padding: 40px;
+    margin-top: 30px;
+    margin-bottom: 50px;
+    max-width: 1200px;
+    border: 1px solid #efe9d8; /* 테두리도 따뜻한 색으로 변경 */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.02); /* 아주 살짝 그림자 */
+}
+
+/* ★ 4. 상단 툴바 (카테고리 + 글쓰기 버튼) */
+.board-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #8c6645; /* ★ 포인트: 브라운 컬러 라인 */
+    padding-bottom: 15px;
+}
+
+.category-filter a {
+    font-size: 1rem;
+    color: #888;
+    margin-right: 20px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+/* 마우스 올리거나 선택됐을 때: 브라운 색상 */
+.category-filter a:hover, .category-filter a.active {
+    color: #8c6645; 
+    font-weight: 700;
+}
+
+/* ★ 5. 게시판 테이블 디자인 (베이지 톤 적용) */
+.board-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.board-table th {
+    background-color: #f7f3e8; /* ★ 헤더 배경: 연한 베이지 */
+    border-top: 1px solid #8c6645; /* 상단: 브라운 실선 */
+    border-bottom: 1px solid #dcd3c1; /* 하단: 진한 베이지 */
+    padding: 15px 0;
+    text-align: center;
+    font-weight: 600;
+    color: #5a4a42; /* 헤더 글자: 짙은 갈색 */
+}
+
+.board-table td {
+    padding: 15px 5px;
+    border-bottom: 1px solid #eee8dc; /* 구분선: 연한 베이지 */
+    text-align: center;
+    color: #666;
+}
+
+/* 제목 컬럼 */
+.board-table td.title-col {
+    text-align: left;
+    padding-left: 20px;
+}
+
+.board-table td.title-col a {
+    color: #333;
+}
+
+.board-table td.title-col a:hover {
+    text-decoration: underline;
+    color: #8c6645; /* 제목에 마우스 올리면 브라운 */
+}
+
+/* 마우스 올렸을 때 행 배경색: 아주 연한 노란빛 */
+.board-table tr:hover {
+    background-color: #fffbf2; 
+}
+
+.comment-cnt {
+    color: #ff6b6b; /* 댓글 수는 포인트로 붉은색 유지 */
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+/* ★ 6. 버튼 및 검색창 스타일 (브라운 테마) */
+.btn-write-custom {
+    border: 1px solid #8c6645;
+    background-color: #fff;
+    color: #8c6645;
+    font-size: 0.9rem;
+    padding: 6px 18px;
+    font-weight: 600;
+    border-radius: 3px; /* 살짝만 둥글게 */
+    transition: all 0.2s;
+}
+
+.btn-write-custom:hover {
+    background-color: #8c6645;
+    color: #fff;
+}
+
+.search-box {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+}
+
+/* 뱃지 색상도 베이지 톤에 맞춤 */
+.badge.bg-light {
+    background-color: #f0ebe1 !important; /* 회색 대신 베이지 */
+    color: #6d5d53 !important;
+    border: 1px solid #ddd6c8 !important;
+}

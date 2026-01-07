@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>회원가입</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5" style="max-width: 500px;">
+    <div class="card shadow">
+        <div class="card-header text-center bg-primary text-white"><h4>회원가입</h4></div>
+        <div class="card-body">
+            
+            <div class="mb-3">
+                <label>아이디</label>
+                <div class="input-group">
+                    <input type="text" id="username" class="form-control" placeholder="4자 이상">
+                    <button type="button" class="btn btn-outline-secondary" onclick="checkUsername()">중복확인</button>
+                </div>
+                <span id="usernameCheckRes" class="text-danger" style="font-size:12px;"></span>
+                <input type="hidden" id="usernameValid" value="false">
+            </div>
+
+            <div class="mb-3">
+                <label>비밀번호</label>
+                <input type="password" id="password" class="form-control" placeholder="8자 이상, 영문+숫자+특수문자">
+            </div>
+
+            <div class="mb-3">
+                <label>닉네임</label>
+                <input type="text" id="nickname" class="form-control">
+            </div>
+
+            <div class="mb-3">
+                <label>전화번호</label>
+                <div class="input-group">
+                    <input type="text" id="phoneNumber" class="form-control" placeholder="01012345678">
+                    <button type="button" class="btn btn-outline-secondary" onclick="sendSms()">인증번호 전송</button>
+                </div>
+            </div>
+
+            <div class="mb-3" id="verifyBox" style="display:none;">
+                <label>인증번호</label>
+                <div class="input-group">
+                    <input type="text" id="verifyCode" class="form-control">
+                    <button class="btn btn-outline-primary" onclick="checkSms()">확인</button>
+                </div>
+                <input type="hidden" id="phoneValid" value="false">
+            </div>
+
+            <button onclick="join()" class="btn btn-primary w-100">가입완료</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. 아이디 중복 체크
+    function checkUsername() {
+        let username = $("#username").val();
+        $.get("/api/check-username?username=" + username, function(res) {
+            if(res.data) {
+                $("#usernameCheckRes").text("이미 존재하는 아이디입니다.");
+                $("#usernameValid").val("false");
+            } else {
+                $("#usernameCheckRes").text("사용 가능한 아이디입니다.").removeClass("text-danger").addClass("text-success");
+                $("#usernameValid").val("true");
+            }
+        });
+    }
+
+    // 2. 문자 발송
+    function sendSms() {
+        let phoneNumber = $("#phoneNumber").val();
+        if(!phoneNumber) { alert("전화번호를 입력하세요."); return; }
+        
+        $.ajax({
+            type: "POST",
+            url: "/api/sms/send",
+            contentType: "application/json",
+            data: JSON.stringify({phoneNumber: phoneNumber}),
+            success: function(res) {
+                alert("인증번호가 발송되었습니다.");
+                $("#verifyBox").show();
+            },
+            error: function(err) { alert("문자 발송 실패"); }
+        });
+    }
+
+    // 3. 인증번호 확인
+    function checkSms() {
+        let phoneNumber = $("#phoneNumber").val();
+        let code = $("#verifyCode").val();
+        
+        $.ajax({
+            type: "POST",
+            url: "/api/sms/verify",
+            contentType: "application/json",
+            data: JSON.stringify({phoneNumber: phoneNumber, code: code}),
+            success: function(res) {
+                if(res.data) {
+                    alert("인증되었습니다.");
+                    $("#phoneValid").val("true");
+                    $("#phoneNumber").prop("readonly", true);
+                } else {
+                    alert("인증번호가 틀렸습니다.");
+                }
+            }
+        });
+    }
+
+    // 4. 회원가입 요청
+    function join() {
+        // 유효성 검사 (프론트)
+        if($("#usernameValid").val() !== "true") { alert("아이디 중복확인을 해주세요."); return; }
+        if($("#phoneValid").val() !== "true") { alert("전화번호 인증을 해주세요."); return; }
+        
+        let data = {
+                username: $("#username").val(),
+                password: $("#password").val(),
+                nickname: $("#nickname").val(),
+                phoneNumber: $("#phoneNumber").val()
+            };
+
+            $.ajax({
+                type: "POST",
+                url: "/auth/joinProc",
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: function(res) {
+                    console.log(res); // ★ F12 콘솔에서 서버 응답을 확인하기 위해 추가
+                    
+                    if(res.status === 200) {
+                        alert("회원가입이 완료되었습니다.");
+                        location.href = "/auth/loginForm";
+                    } else {
+                        // 여기서 undefined가 뜬다면 res.data가 없는 것
+                        alert(res.data); 
+                    }
+                },
+                error: function(err) {
+                    // 서버 에러(500)가 났을 때 확인용
+                    console.log(err);
+                    alert("서버 오류가 발생했습니다. 관리자에게 문의하세요.");
+                }
+            });
+        }
+</script>
+</body>
+</html>
