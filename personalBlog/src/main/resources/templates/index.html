@@ -9,8 +9,8 @@
 </head>
 <body>
 
-<header class="blog-header">
-    <h1 class="blog-title">My Coding Life</h1>
+<header class="blog-header" onclick="location.href='/'" style="height: 200px; cursor: pointer;">
+    <h1 class="blog-title" style="font-size: 2.5rem;">My Coding Life</h1>
     <p class="blog-subtitle">소소한 일상과 개발 기록을 남기는 공간</p>
 </header>
 
@@ -19,24 +19,30 @@
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
-        
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
             </ul>
-
+            
             <ul class="navbar-nav ms-auto align-items-center">
-                <li class="nav-item" sec:authorize="isAnonymous()">
-                    <a class="nav-link" href="/auth/loginForm">로그인</a>
-                </li>
-                <li class="nav-item" sec:authorize="isAnonymous()">
-                    <a class="nav-link" href="/auth/joinForm">회원가입</a>
-                </li>
+                
+                <li class="nav-item" sec:authorize="isAnonymous()"><a class="nav-link" href="/auth/loginForm">로그인</a></li>
+                <li class="nav-item" sec:authorize="isAnonymous()"><a class="nav-link" href="/auth/joinForm">회원가입</a></li>
                 
                 <li class="nav-item d-flex align-items-center" sec:authorize="isAuthenticated()">
-                    <span class="me-3 text-secondary">
-                        반갑습니다, <strong class="text-dark" sec:authentication="principal.user.nickname">User</strong>님
-                    </span>
+                    
+                    <a th:if="${#authentication.principal.user.role.name() == 'ADMIN'}" 
+                       href="/admin" class="btn btn-danger btn-sm rounded-pill me-3">관리자</a>
+
+                    <img th:src="${#authentication.principal.user.profileUrl != null ? #authentication.principal.user.profileUrl : 'https://dummyimage.com/40x40/dee2e6/6c757d.jpg'}"
+                         class="rounded-circle me-2 border" 
+                         style="width: 40px; height: 40px; object-fit: cover;">
+
+                    <a href="/user/updateForm" class="text-decoration-none fw-bold text-dark me-3" 
+                       data-bs-toggle="tooltip" title="회원정보 수정">
+                       <span sec:authentication="principal.user.nickname">User</span>님
+                    </a>
+                    
                     <a class="btn btn-outline-secondary btn-sm rounded-pill" href="/logout">로그아웃</a>
                 </li>
             </ul>

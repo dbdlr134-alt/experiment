@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>아이디 찾기</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet"> <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+<header class="blog-header" onclick="location.href='/'" style="cursor: pointer;">
+    <h1 class="blog-title">My Coding Life</h1>
+    <p class="blog-subtitle">소소한 일상과 개발 기록을 남기는 공간</p>
+</header>
+
+<div class="container main-box" style="max-width: 500px; margin-top: 50px;">
+    <div class="login-card">
+        
+        <div class="text-center mb-4">
+            <h3 class="fw-bold" style="color: #4a4a4a;">🔍 아이디 찾기</h3>
+            <p class="text-muted small">가입 시 등록한 닉네임을 입력하세요.</p>
+        </div>
+
+        <form>
+            <div class="mb-4">
+                <label class="form-label fw-bold small">닉네임</label>
+                <input type="text" id="nickname" class="form-control" placeholder="닉네임 입력 (예: 홍길동)">
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="button" onclick="findId()" class="btn btn-brown">아이디 찾기</button>
+                <a href="/auth/loginForm" class="btn btn-outline-secondary rounded-pill py-2">로그인으로 돌아가기</a>
+            </div>
+        </form>
+        
+        <div id="result-box" class="alert alert-warning mt-4 d-none text-center">
+            <p class="mb-1 small">회원님의 아이디는:</p>
+            <h4 class="fw-bold" style="color: #5a4a42;" id="found-id-text"></h4>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function findId() {
+        let nickname = $("#nickname").val();
+
+        if(!nickname) {
+            alert("닉네임을 입력해주세요.");
+            return;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/auth/find-id",
+            data: JSON.stringify({nickname: nickname}), // 닉네임만 JSON으로 전송
+            contentType: "application/json; charset=utf-8",
+            dataType: "json"
+        }).done(function(resp) {
+            // 성공 시 결과창 보여주기
+            $("#result-box").removeClass("d-none");
+            $("#found-id-text").text(resp.data);
+        }).fail(function(error) {
+            // 실패 시 에러 메시지 띄우기
+            if(error.responseJSON && error.responseJSON.data) {
+                alert(error.responseJSON.data);
+            } else {
+                alert("아이디 찾기 실패");
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

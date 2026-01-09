@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>회원정보 수정</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+<header class="blog-header" onclick="location.href='/'" style="cursor: pointer;">
+    <h1 class="blog-title">My Coding Life</h1>
+    <p class="blog-subtitle">소소한 일상과 개발 기록을 남기는 공간</p>
+</header>
+
+<nav class="navbar navbar-expand-lg blog-nav sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/" style="font-size: 0.9rem; color: #555;">Home</a>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                 <li class="nav-item d-flex align-items-center" sec:authorize="isAuthenticated()">
+                    <img th:src="${#authentication.principal.user.profileUrl != null ? #authentication.principal.user.profileUrl : 'https://dummyimage.com/40x40/dee2e6/6c757d.jpg'}"
+                         class="rounded-circle me-2 border" 
+                         style="width: 40px; height: 40px; object-fit: cover;">
+                    <span class="me-3 text-secondary">반갑습니다, <strong class="text-dark" sec:authentication="principal.user.nickname">User</strong>님</span>
+                    <a class="btn btn-outline-secondary btn-sm rounded-pill" href="/logout">로그아웃</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container main-box" style="max-width: 600px;">
+    
+    <div class="board-toolbar justify-content-center border-bottom-0 mb-4">
+        <h3 class="fw-bold text-dark" style="color: #5a4a42 !important;">⚙️ 회원정보 수정</h3>
+    </div>
+
+    <form>
+        <input type="hidden" id="id" th:value="${principal.user.id}">
+
+        <div class="text-center mb-4">
+            <img id="profile-img" 
+                 th:src="${#strings.isEmpty(principal.user.profileUrl) ? 'https://dummyimage.com/150x150/dee2e6/6c757d.jpg' : principal.user.profileUrl}"
+                 onerror="this.src='https://dummyimage.com/150x150/dee2e6/6c757d.jpg'"
+                 class="rounded-circle shadow-sm" 
+                 style="width: 150px; height: 150px; object-fit: cover; cursor: pointer;"
+                 onclick="document.getElementById('profile-file').click();"
+                 data-bs-toggle="tooltip" title="클릭해서 사진 변경">
+            
+            <input type="file" id="profile-file" style="display: none;" onchange="uploadProfileImage(this)">
+            <p class="text-muted mt-2 small">사진을 클릭하여 변경하세요</p>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold text-secondary">아이디 (변경불가)</label>
+            <input type="text" class="form-control" th:value="${principal.user.username}" readonly>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold text-secondary">비밀번호 변경</label>
+            <input type="password" id="password" class="form-control" placeholder="변경하려면 입력하세요 (비워두면 유지)">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold text-secondary">닉네임</label>
+            <input type="text" id="nickname" class="form-control" th:value="${principal.user.nickname}">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold text-secondary">전화번호</label>
+            <input type="text" id="phoneNumber" class="form-control" th:value="${principal.user.phoneNumber}">
+        </div>
+
+        <div class="d-flex justify-content-center gap-2 mt-5">
+            <button type="button" class="btn btn-secondary rounded-pill py-2 px-4 fs-5" onclick="history.back()">취소하기</button>
+            <button type="button" onclick="update()" class="btn btn-write-custom rounded-pill py-2 px-5 fs-5">수정완료</button>
+        </div>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // 1. 프로필 사진 업로드 (이미지 선택하자마자 바로 실행)
+    function uploadProfileImage(input) {
+        if (input.files && input.files[0]) {
+            let formData = new FormData();
+            formData.append("image", input.files[0]);
+
+            $.ajax({
+                type: "PUT",
+                url: "/api/user/profile", // UserApiController의 주소와 일치해야 함
+                data: formData,
+                contentType: false, // 필수: false 로 설정해야 multipart/form-data로 전송됨
+                processData: false, // 필수: false 로 설정해야 쿼리스트링으로 변환 안 됨
+                dataType: "json"
+            }).done(function(resp) {
+                // 업로드 성공 시 화면 이미지 즉시 변경
+                $("#profile-img").attr("src", resp.data);
+                alert("프로필 사진이 변경되었습니다.");
+            }).fail(function(error) {
+                alert("사진 업로드 실패 (용량이 너무 크거나 파일 형식이 잘못되었습니다.)");
+            });
+        }
+    }
+
+    // 2. 회원 정보 수정 (비밀번호, 닉네임 등)
+    function update() {
+        // 유효성 검사
+        if($("#nickname").val().trim() === "") {
+            alert("닉네임을 입력해주세요.");
+            return;
+        }
+
+        let data = {
+            id: $("#id").val(),
+            password: $("#password").val(),
+            nickname: $("#nickname").val(),
+            phoneNumber: $("#phoneNumber").val()
+        };
+
+        $.ajax({
+            type: "PUT",
+            url: "/user",
+            data: JSON.stringify(data),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json"
+        }).done(function(resp) {
+            alert("회원수정이 완료되었습니다. 다시 로그인해주세요.");
+            location.href = "/logout"; // 정보가 바뀌었으니 로그아웃 시킴
+        }).fail(function(error) {
+            alert("회원수정 실패");
+        });
+    }
+</script>
+
+</body>
+</html>

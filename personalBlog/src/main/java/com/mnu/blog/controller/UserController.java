@@ -1,7 +1,11 @@
 package com.mnu.blog.controller;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+
+import com.mnu.blog.config.auth.PrincipalDetail;
 
 @Controller
 public class UserController {
@@ -20,5 +24,24 @@ public class UserController {
     @GetMapping("/auth/loginForm")
     public String loginForm() {
         return "user/loginForm";
+    }
+    
+ // 회원정보 수정 페이지 (마이페이지)
+    @GetMapping("/user/updateForm")
+    public String updateForm(@AuthenticationPrincipal PrincipalDetail principal, Model model) {
+        model.addAttribute("principal", principal); // 현재 로그인한 정보 전달
+        return "user/updateForm";
+    }
+    
+ // 비밀번호 찾기 페이지 이동
+    @GetMapping("/auth/findPassword")
+    public String findPassword() {
+        return "user/findPassword";
+    }
+    
+ // 아이디 찾기 화면으로 이동
+    @GetMapping("/auth/findId")
+    public String findIdForm() {
+        return "user/findId";
     }
 }

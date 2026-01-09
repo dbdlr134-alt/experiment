@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>관리자 페이지</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="/css/style.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+<header class="blog-header" onclick="location.href='/'" style="height: 150px; cursor: pointer;">
+    <h1 class="blog-title" style="font-size: 2rem;">Admin Dashboard</h1>
+    <p class="blog-subtitle">블로그 관리자 모드</p>
+</header>
+
+<nav class="navbar navbar-expand-lg blog-nav sticky-top">
+    <div class="container-fluid">
+        <ul class="navbar-nav me-auto">
+            <li class="nav-item"><a class="nav-link" href="/">블로그 홈으로</a></li>
+        </ul>
+        <ul class="navbar-nav ms-auto">
+             <li class="nav-item"><a class="nav-link" href="/logout">로그아웃</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container main-box" style="max-width: 1000px;">
+    
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm" style="background-color: #fcf8f3;">
+                <div class="card-body text-center py-4">
+                    <h5 class="text-secondary fw-bold">총 회원 수</h5>
+                    <h2 class="fw-bold" style="color: #8c6645;" th:text="${users.size()} + '명'">0명</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+             <div class="card border-0 shadow-sm" style="background-color: #fcf8f3;">
+                <div class="card-body text-center py-4">
+                    <h5 class="text-secondary fw-bold">전체 게시글</h5>
+                    <h2 class="fw-bold" style="color: #8c6645;" th:text="${posts.totalElements} + '개'">0개</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h5 class="fw-bold border-bottom pb-2 mb-3"><i class="bi bi-people-fill"></i> 회원 관리</h5>
+    <table class="table table-hover text-center mb-5">
+        <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>아이디</th>
+                <th>닉네임</th>
+                <th>권한</th>
+                <th>관리</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="user : ${users}">
+                <td th:text="${user.id}">1</td>
+                <td th:text="${user.username}">user1</td>
+                <td th:text="${user.nickname}">홍길동</td>
+                <td>
+                    <span th:if="${user.role.name() == 'ADMIN'}" class="badge bg-danger">관리자</span>
+                    <span th:if="${user.role.name() == 'USER'}" class="badge bg-secondary">일반</span>
+                </td>
+                <td>
+                    <button th:if="${user.role.name() != 'ADMIN'}" 
+                            class="btn btn-sm btn-outline-danger" 
+                            th:onclick="'deleteUser(' + ${user.id} + ')'">추방</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h5 class="fw-bold border-bottom pb-2 mb-3"><i class="bi bi-file-text-fill"></i> 최근 게시글 관리</h5>
+    <table class="table table-hover mb-3">
+        <thead class="table-light text-center">
+            <tr>
+                <th>번호</th>
+                <th>제목</th>
+                <th>작성자</th>
+                <th>관리</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="post : ${posts}">
+                <td class="text-center" th:text="${post.id}">1</td>
+                <td th:text="${post.title}">제목입니다</td>
+                <td class="text-center" th:text="${post.user.nickname}">작성자</td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-outline-danger" th:onclick="'deletePost(' + ${post.id} + ')'">삭제</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+
+    // 1. 회원 추방 (User Delete)
+    function deleteUser(userId) {
+        if(!confirm("정말 이 회원을 추방하시겠습니까?\n(삭제된 회원은 복구할 수 없습니다.)")) return;
+        
+        $.ajax({
+            type: "DELETE",
+            url: "/api/user/" + userId,
+            dataType: "json"
+        }).done(function(resp) {
+            if(resp.status === 403) {
+                alert("권한이 없습니다.");
+            } else {
+                alert("회원이 추방되었습니다.");
+                location.reload(); // 새로고침하여 목록 갱신
+            }
+        }).fail(function(error) {
+            alert("회원 삭제 실패: " + JSON.stringify(error));
+        });
+    }
+
+    // 2. 게시글 삭제 (Post Delete)
+    function deletePost(postId) {
+        if(!confirm("관리자 권한으로 이 글을 삭제하시겠습니까?")) return;
+        
+        $.ajax({
+            type: "DELETE",
+            url: "/api/board/" + postId,
+            dataType: "json"
+        }).done(function(resp) {
+            alert("게시글이 삭제되었습니다.");
+            location.reload(); // 새로고침
+        }).fail(function(error) {
+            alert("게시글 삭제 실패");
+        });
+    }
+</script>
+
+</body>
+</html>

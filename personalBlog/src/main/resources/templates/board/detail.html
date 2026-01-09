@@ -10,88 +10,113 @@
 </head>
 <body>
 
-<header class="blog-header" style="height: 200px;">
-    <h2 class="blog-title" style="font-size: 2rem;">My Bravo Life</h2>
+<header class="blog-header" onclick="location.href='/'" style="height: 200px; cursor: pointer;">
+    <h1 class="blog-title" style="font-size: 2.5rem;">My Coding Life</h1>
+    <p class="blog-subtitle">소소한 일상과 개발 기록을 남기는 공간</p>
 </header>
 
 <nav class="navbar navbar-expand-lg blog-nav sticky-top">
-    <div class="container-fluid justify-content-center">
-        <ul class="navbar-nav">
-             <li class="nav-item"><a class="nav-link" href="/">홈으로 가기</a></li>
-        </ul>
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+            </ul>
+            
+            <ul class="navbar-nav ms-auto align-items-center">
+                
+                <li class="nav-item" sec:authorize="isAnonymous()"><a class="nav-link" href="/auth/loginForm">로그인</a></li>
+                <li class="nav-item" sec:authorize="isAnonymous()"><a class="nav-link" href="/auth/joinForm">회원가입</a></li>
+                
+                <li class="nav-item d-flex align-items-center" sec:authorize="isAuthenticated()">
+                    
+                    <a th:if="${#authentication.principal.user.role.name() == 'ADMIN'}" 
+                       href="/admin" class="btn btn-danger btn-sm rounded-pill me-3">관리자</a>
+
+                    <img th:src="${#authentication.principal.user.profileUrl != null ? #authentication.principal.user.profileUrl : 'https://dummyimage.com/40x40/dee2e6/6c757d.jpg'}"
+                         class="rounded-circle me-2 border" 
+                         style="width: 40px; height: 40px; object-fit: cover;">
+
+                    <a href="/user/updateForm" class="text-decoration-none fw-bold text-dark me-3" 
+                       data-bs-toggle="tooltip" title="회원정보 수정">
+                       <span sec:authentication="principal.user.nickname">User</span>님
+                    </a>
+                    
+                    <a class="btn btn-outline-secondary btn-sm rounded-pill" href="/logout">로그아웃</a>
+                </li>
+            </ul>
+        </div>
     </div>
 </nav>
 
 <div class="container main-box">
     <input type="hidden" id="boardId" th:value="${post.id}">
 
-    <div class="post-content-wrapper">
-        <div class="d-flex justify-content-between align-items-end mb-3 border-bottom pb-3">
-            <div>
-                <span class="badge bg-secondary mb-2" th:text="${post.boardType}">카테고리</span>
-                <h2 class="fw-bold" th:text="${post.title}">제목입니다</h2>
-                <div class="text-muted" style="font-size: 0.9rem;">
-                    <span th:text="${post.user.nickname}">작성자</span> · 
-                    <span th:text="${#dates.format(post.createDate, 'yyyy-MM-dd HH:mm')}">날짜</span>
-                </div>
-            </div>
-            
-            <div class="d-flex align-items-center gap-3">
-                <span class="text-muted">조회 <span th:text="${post.count}">0</span></span>
-                <button class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1" id="btn-love" style="border-radius: 20px;">
-                    <i class="bi bi-heart-fill"></i> 
-                    좋아요 <span th:text="${post.loves.size()}">0</span>
-                </button>
-            </div>
-        </div>
+    <div class="post-header">
+        <div class="post-category" th:text="'[' + ${post.boardType} + ']'">[일상]</div>
+        <h2 class="post-title" th:text="${post.title}">게시글 제목이 들어갑니다.</h2>
         
-        <div class="card-text py-4" style="min-height: 200px;" th:utext="${post.content}">
-            내용입니다.
-        </div>
-
-        <div class="d-flex justify-content-end mt-4 pt-3 border-top" 
-             th:if="${post.user.username == #authentication.name}">
-            <a th:href="@{/board/{id}/updateForm(id=${post.id})}" class="btn btn-secondary btn-sm me-2 rounded-pill">수정</a>
-            <button id="btn-delete" class="btn btn-outline-secondary btn-sm rounded-pill">삭제</button>
+        <div class="post-meta">
+            <span><i class="bi bi-person"></i> <span th:text="${post.user.nickname}">홍길동</span></span>
+            <span class="text-muted">|</span>
+            <span><i class="bi bi-clock"></i> <span th:text="${#dates.format(post.createDate, 'yyyy.MM.dd HH:mm')}">2026.01.07</span></span>
+            <span class="text-muted">|</span>
+            <span><i class="bi bi-eye"></i> <span th:text="${post.count}">0</span></span>
         </div>
     </div>
 
-    <div class="mt-5 bg-light p-3 rounded">
-        <textarea id="reply-content" class="form-control mb-2" rows="2" placeholder="댓글을 남겨주세요"></textarea>
-        <div class="d-flex justify-content-end">
-            <button type="button" id="btn-reply-save" class="btn btn-brown btn-sm rounded-pill px-3">등록</button>
+    <div class="post-body">
+        <div th:utext="${post.content}">내용입니다.</div>
+        
+        <div class="text-center mt-5">
+            <button id="btn-love" class="btn btn-love-custom">
+                <i class="bi bi-heart-fill"></i> 좋아요 <span th:text="${post.loves.size()}">0</span>
+            </button>
         </div>
     </div>
 
-    <div class="mt-4">
-        <h6 class="fw-bold border-bottom pb-2">댓글 리스트</h6>
-        <ul class="list-group list-group-flush">
+    <div class="post-footer">
+        <a href="/" class="btn btn-secondary rounded-pill px-4">목록으로</a>
+
+        <div th:if="${post.user.username == #authentication.name}">
+            <a th:href="@{/board/{id}/updateForm(id=${post.id})}" class="btn btn-outline-secondary btn-sm rounded-pill me-1">수정</a>
+            <button id="btn-delete" class="btn btn-outline-danger btn-sm rounded-pill">삭제</button>
+        </div>
+    </div>
+
+    <div class="comment-section">
+        <h5 class="fw-bold mb-3"><i class="bi bi-chat-dots"></i> 댓글 <span th:text="${post.replys.size()}">0</span></h5>
+        
+        <ul class="list-group comment-list mb-4">
             <li class="list-group-item" th:each="reply : ${post.replys}">
                 <div class="d-flex justify-content-between">
-                    <div class="d-flex align-items-start">
-                        <div class="ms-2">
-                            <div class="d-flex align-items-center gap-2">
-                                <strong th:text="${reply.user.nickname}" style="font-size: 0.95rem;">작성자</strong>
-                                <small class="text-muted" style="font-size: 0.8rem;" 
-                                       th:text="${#dates.format(reply.createDate, 'yyyy-MM-dd HH:mm')}">날짜</small>
-                            </div>
-                            <p class="mb-0 mt-1" th:text="${reply.content}" style="font-size: 0.95rem; white-space: pre-wrap;">댓글 내용</p>
-                        </div>
+                    <div>
+                        <strong class="me-2" th:text="${reply.user.nickname}">작성자</strong>
+                        <span class="text-muted" style="font-size: 0.8rem;" th:text="${#dates.format(reply.createDate, 'yyyy-MM-dd HH:mm')}">날짜</span>
+                        <div class="mt-1" th:text="${reply.content}" style="white-space: pre-wrap;">댓글 내용</div>
                     </div>
-                    
                     <button th:if="${reply.user.username == #authentication.name}" 
                             th:onclick="'replyDelete(' + ${post.id} + ',' + ${reply.id} + ')'" 
-                            class="btn btn-link text-danger text-decoration-none p-0" style="font-size: 0.8rem;">삭제</button>
+                            class="btn btn-sm text-danger"><i class="bi bi-x-lg"></i></button>
                 </div>
             </li>
         </ul>
+
+        <div class="card border-0">
+            <div class="card-body p-0">
+                <textarea id="reply-content" class="form-control" rows="3" placeholder="소중한 댓글을 남겨주세요"></textarea>
+                <div class="d-flex justify-content-end mt-2">
+                    <button type="button" id="btn-reply-save" class="btn btn-write-custom rounded-pill">댓글 등록</button>
+                </div>
+            </div>
+        </div>
     </div>
-    
-    <div class="mt-5 text-center">
-        <a href="/" class="btn btn-outline-secondary rounded-pill px-4">목록으로</a>
-    </div>
+
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // 1. 글 삭제
     $("#btn-delete").click(function() {
@@ -114,6 +139,11 @@
     $("#btn-reply-save").click(function() {
         let data = { content: $("#reply-content").val() };
         let boardId = $("#boardId").val();
+
+        if(data.content.trim() === "") {
+            alert("댓글 내용을 입력해주세요.");
+            return;
+        }
 
         $.ajax({
             type: "POST",

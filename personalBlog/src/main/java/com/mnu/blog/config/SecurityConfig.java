@@ -1,26 +1,24 @@
 package com.mnu.blog.config;
 
+import com.mnu.blog.config.auth.PrincipalOauth2UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-import com.mnu.blog.config.auth.PrincipalDetailService;
-
-import jakarta.servlet.DispatcherType;
-import lombok.RequiredArgsConstructor; // ★ import 추가
-
-@Configuration
-@EnableWebSecurity
-@RequiredArgsConstructor // ★ 생성자 주입을 위해 추가
+@Configuration 
+@EnableWebSecurity 
+@EnableMethodSecurity(securedEnabled = true) 
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    // ★ 자동 로그인을 위해 사용자 정보 가져오는 서비스가 필요함
-    private final PrincipalDetailService principalDetailService;
+    private final PrincipalOauth2UserService principalOauth2UserService;
 
     @Bean
     public BCryptPasswordEncoder encodePWD() {
@@ -30,28 +28,30 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(authorize -> authorize
-                .dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll()
-                .requestMatchers("/error").permitAll()
-                .requestMatchers("/", "/auth/**", "/js/**", "/css/**", "/images/**", "/board/**", "/dummy/**") 
-                .permitAll()
+            .csrf(csrf -> csrf.disable()) 
+            .authorizeHttpRequests(auth -> auth
+                // 1. 정적 자원 및 메인 페이지, 인증 페이지 (모두 허용)
+                .requestMatchers("/", "/auth/**", "/js/**", "/css/**", "/images/**", "/dummy/**", "/api/**").permitAll()
+                
+                // 3. 관리자 페이지 (ADMIN만 허용)
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                
+                // 4. 그 외 모든 요청은 로그인해야 접근 가능
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
-                .loginPage("/auth/loginForm")
-                .loginProcessingUrl("/auth/loginProc")
-                .defaultSuccessUrl("/")
-                .failureUrl("/auth/loginForm?error")
+                .loginPage("/auth/loginForm")       
+                .loginProcessingUrl("/auth/loginProc") 
+                .defaultSuccessUrl("/")             
             )
-            // ★ [쿠키 기능 추가] 자동 로그인 (Remember-Me)
-            .rememberMe(remember -> remember
-                .key("my-unique-secret-key") // 쿠키 암호화에 쓸 나만의 키 (아무거나 가능)
-                .tokenValiditySeconds(60 * 60 * 24 * 7) // 쿠키 유지 시간 (7일 설정)
-                .userDetailsService(principalDetailService) // 사용자 정보 찾을 때 쓸 서비스
-                .rememberMeParameter("remember-me") // HTML 체크박스의 name 값
+            .oauth2Login(oauth2 -> oauth2
+                .loginPage("/auth/loginForm")       
+                .userInfoEndpoint(userInfo -> userInfo
+                    .userService(principalOauth2UserService) 
+                )
+                .defaultSuccessUrl("/")             
             );
-            
+
         return http.build();
     }
     
