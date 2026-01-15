@@ -1,82 +1,94 @@
 package com.mnu.blog.service;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.mnu.blog.domain.Role;
 import com.mnu.blog.domain.User;
 import com.mnu.blog.dto.UserJoinDto;
+import com.mnu.blog.dto.UserUpdateDto; // DTO 임포트
 import com.mnu.blog.repository.UserRepository;
 
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j; // 로깅
 import net.nurigo.sdk.NurigoApp;
 import net.nurigo.sdk.message.model.Message;
 import net.nurigo.sdk.message.service.DefaultMessageService;
 
+@Slf4j // ★ 로그 사용
 @Service
+@RequiredArgsConstructor // final 필드 생성자 주입
 public class UserService {
 
-    @Autowired private UserRepository userRepository;
-    @Autowired private BCryptPasswordEncoder encoder;
-
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder encoder;
     private DefaultMessageService messageService;
-    
+
     // 인증번호 저장소
     private Map<String, String> verifyStore = new ConcurrentHashMap<>();
 
-    // application.properties에서 값 가져오기
+    // ★ application.properties에서 값 주입
     @Value("${coolsms.api.key}") private String apiKey;
     @Value("${coolsms.api.secret}") private String apiSecret;
     @Value("${coolsms.api.number}") private String senderNumber;
+    @Value("${file.path}") private String uploadFolder; // ★ 파일 저장 경로 주입
 
     @PostConstruct
     public void init() {
-        // 쿨에스엠에스 초기화
-        this.messageService = NurigoApp.INSTANCE.initialize(apiKey, apiSecret, "https://api.coolsms.co.kr");
+        try {
+            this.messageService = NurigoApp.INSTANCE.initialize(apiKey, apiSecret, "https://api.coolsms.co.kr");
+        } catch (Exception e) {
+            log.error("CoolSMS 초기화 실패: {}", e.getMessage());
+        }
     }
 
-    // 1. 중복 체크
     @Transactional(readOnly = true)
     public boolean checkUsernameDuplicate(String username) {
         return userRepository.findByUsername(username).isPresent();
     }
     
-    // 2. 인증번호 발송 (실제 발송)
+    @Transactional(readOnly = true)
+    public boolean checkNicknameDuplicate(String nickname) {
+        return userRepository.findByNickname(nickname).isPresent();
+    }
+
     public void sendSms(String phoneNumber) {
-        // 4자리 난수 생성
         String randomCode = String.format("%04d", new Random().nextInt(10000)); 
         
         Message message = new Message();
-        message.setFrom(senderNumber); // 발신번호 (등록된 번호만 가능)
-        message.setTo(phoneNumber.replaceAll("-", "")); // 수신번호 (하이픈 제거)
+        message.setFrom(senderNumber);
+        message.setTo(phoneNumber.replaceAll("-", ""));
         message.setText("[MyBlog] 인증번호는 [" + randomCode + "] 입니다.");
 
         try {
-            messageService.send(message); // 문자 전송
-            verifyStore.put(phoneNumber, randomCode); // 메모리에 저장
-            System.out.println("문자 전송 성공: " + randomCode); // 로그 확인용
+            messageService.send(message);
+            verifyStore.put(phoneNumber, randomCode);
+            log.info("문자 전송 성공 - 번호: {}, 코드: {}", phoneNumber, randomCode); // ★ 로그로 변경
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("문자 전송 실패: " + e.getMessage());
+            log.error("문자 전송 실패", e);
+            throw new RuntimeException("문자 전송 실패");
         }
     }
 
-    // 3. 인증번호 확인
     public boolean verifySms(String phoneNumber, String code) {
         String savedCode = verifyStore.get(phoneNumber);
         return savedCode != null && savedCode.equals(code);
     }
 
-    // 4. 회원가입
     @Transactional
     public void 회원가입(UserJoinDto dto) {
         User user = User.builder()
@@ -89,97 +101,104 @@ public class UserService {
         userRepository.save(user);
         verifyStore.remove(dto.getPhoneNumber()); 
     }
-    
- // ★ [추가] 닉네임 중복 체크 (true면 중복)
-    @Transactional(readOnly = true)
-    public boolean checkNicknameDuplicate(String nickname) {
-        return userRepository.findByNickname(nickname).isPresent();
-    }
 
+    // ★ DTO 적용 및 로직 개선
     @Transactional
-    public void 회원수정(User user) {
-        // 1. 영속화 (DB에서 기존 회원 정보 가져오기)
-        User persistance = userRepository.findById(user.getId())
+    public void 회원수정(UserUpdateDto dto) {
+        User persistence = userRepository.findById(dto.getId())
                 .orElseThrow(() -> new IllegalArgumentException("회원 찾기 실패"));
 
-        // 2. 비밀번호 수정 로직 (★이 부분을 수정하세요)
-        String rawPassword = user.getPassword();
-        
-        // 유효성 검사: null이 아니고, 빈 문자열이 아니고, 공백만 있는 것도 아닌 경우에만 수정
-        if (rawPassword != null && !rawPassword.trim().isEmpty()) {
-            String encPassword = encoder.encode(rawPassword);
-            persistance.setPassword(encPassword);
+     // 비밀번호 수정 로직
+        if (dto.getPassword() != null && !dto.getPassword().trim().isEmpty()) {
+            String encPassword = encoder.encode(dto.getPassword());
+            persistence.setPassword(encPassword);
+            persistence.setTempPw(false); // ★ [추가] 직접 비밀번호를 바꿨으니 깃발 끄기!
         }
 
-        // 3. 나머지 정보 수정
-        persistance.setNickname(user.getNickname());
-        persistance.setPhoneNumber(user.getPhoneNumber());
+        persistence.setNickname(dto.getNickname());
+        persistence.setPhoneNumber(dto.getPhoneNumber());
+    }
+
+    // ★ [이동됨] 프로필 사진 변경 로직을 서비스로 이동
+    @Transactional
+    public String 프로필사진변경(Long userId, MultipartFile image) {
+        UUID uuid = UUID.randomUUID();
+        String imageFileName = uuid + "_" + image.getOriginalFilename();
         
-        // 프로필 사진 변경
-        if(user.getProfileUrl() != null) {
-            persistance.setProfileUrl(user.getProfileUrl());
+        Path imageFilePath = Paths.get(uploadFolder + imageFileName);
+        
+        try {
+            // 폴더가 없으면 생성
+            File folder = new File(uploadFolder);
+            if (!folder.exists()) folder.mkdirs();
+            
+            Files.write(imageFilePath, image.getBytes());
+        } catch (Exception e) {
+            log.error("파일 업로드 실패", e);
+            throw new RuntimeException("프로필 사진 업로드 실패");
         }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("회원 찾기 실패"));
         
-        // @Transactional이 걸려있으므로 함수 종료 시 자동 커밋 (더티 체킹)
+        // DB에 저장할 경로 (WebMvcConfig에서 매핑 필요)
+        String dbPath = "/images/profile/" + imageFileName;
+        user.setProfileUrl(dbPath);
+        
+        return dbPath;
     }
     
- // (관리자용) 전체 회원 목록 가져오기
     @Transactional(readOnly = true)
     public List<User> 회원목록() {
         return userRepository.findAll();
     }
     
-    // (관리자용) 회원 강제 추방
     @Transactional
     public void 회원삭제(Long id) {
         userRepository.deleteById(id);
     }
     
     @Transactional
-    // ★ 매개변수 변경: email -> phoneNumber
-    public String 비밀번호찾기(String username, String phoneNumber) {
-        
+    public void 비밀번호찾기(String username, String phoneNumber) {
+        // 1. 유저 확인
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디입니다."));
 
-        // ★ [수정됨] 전화번호가 일치하는지 확인
         if (user.getPhoneNumber() == null || !user.getPhoneNumber().equals(phoneNumber)) {
              throw new IllegalArgumentException("등록된 전화번호와 일치하지 않습니다.");
         }
 
-        // 소셜 로그인 유저 확인
-        if (user.getProvider() != null && !user.getProvider().equals("empty")) { // empty체크는 null이 아닐때만
-             // provider가 null이 아니면 소셜 로그인 유저
-             throw new IllegalArgumentException("소셜 로그인 회원은 비밀번호 찾기가 불가능합니다.");
-        }
-        
-        // (소셜 로그인 확인 로직을 좀 더 안전하게)
-        if (user.getProvider() != null && !user.getProvider().isEmpty() && !user.getProvider().equals("null")) {
+        // 소셜 로그인 유저인지 체크
+        if (user.getProvider() != null && !user.getProvider().equals("empty")) {
              throw new IllegalArgumentException("소셜 로그인 회원은 해당 플랫폼을 이용해주세요.");
         }
 
-        // 임시 비밀번호 생성 (8자리)
         String tempPassword = UUID.randomUUID().toString().substring(0, 8);
+        user.setPassword(encoder.encode(tempPassword));
+        user.setTempPw(true); // ★ [추가] 임시 비밀번호 발급했으니 깃발 켜기!
 
-        // 비밀번호 변경
-        String encPassword = encoder.encode(tempPassword);
-        user.setPassword(encPassword);
-        
-        return tempPassword;
+        // 3. ★ [변경] 화면에 리턴하지 않고, 여기서 바로 문자로 전송
+        Message message = new Message();
+        message.setFrom(senderNumber); // application.properties의 발신번호
+        message.setTo(phoneNumber.replaceAll("-", "")); // 수신번호 (하이픈 제거)
+        message.setText("[MyBlog] 고객님의 임시 비밀번호는 [" + tempPassword + "] 입니다. 로그인 후 변경해주세요.");
+
+        try {
+            messageService.send(message);
+            log.info("임시 비밀번호 문자 전송 성공: {}", phoneNumber);
+        } catch (Exception e) {
+            log.error("문자 전송 실패", e);
+            throw new RuntimeException("문자 전송 시스템 오류가 발생했습니다.");
+        }
     }
-    
     @Transactional(readOnly = true)
     public String 아이디찾기(String nickname) {
-        // 1. 닉네임으로 회원 찾기
         User user = userRepository.findByNickname(nickname)
                 .orElseThrow(() -> new IllegalArgumentException("해당 닉네임으로 가입된 회원이 없습니다."));
 
-        // 2. 소셜 로그인 회원인지 확인 (아이디가 복잡하므로 알려줌)
         if (user.getProvider() != null && !user.getProvider().equals("empty") && !user.getProvider().equals("null")) {
             return "고객님은 [" + user.getProvider() + "] 소셜 로그인 회원입니다.";
         }
-
-        // 3. 일반 회원이면 아이디 리턴
         return user.getUsername();
     }
 }

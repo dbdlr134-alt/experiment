@@ -40,4 +40,7 @@ public class User {
  // ★ [추가] 프로필 사진 경로
     @Column(length = 300) // 구글 이미지 URL이 길 수 있어서 넉넉하게
     private String profileUrl;
+    
+    @Column(columnDefinition = "boolean default false")
+    private boolean tempPw;
 }
