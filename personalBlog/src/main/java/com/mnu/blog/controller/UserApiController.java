@@ -101,38 +101,40 @@ public class UserApiController {
         return new ResponseDto<>(HttpStatus.OK.value(), 1);
     }
     
- // ★ [추가] 프로필 사진 업로드 및 수정 API
+ // ★ [수정됨] 프로필 사진 업로드 및 수정 API
     @PutMapping("/api/user/profile")
     public ResponseDto<String> profileUpdate(@RequestParam("image") MultipartFile image,
                                              @AuthenticationPrincipal PrincipalDetail principal) {
         
-        UUID uuid = UUID.randomUUID(); // 파일명 중복 방지
+        UUID uuid = UUID.randomUUID(); 
         String imageFileName = uuid + "_" + image.getOriginalFilename(); 
         
-        // 저장 경로: 실제 프로젝트 폴더 내의 images/profile 폴더
-        // (주의: 실제 배포 시엔 경로가 달라지지만, 학습용으론 이 방식이 가장 직관적입니다)
-        String uploadFolder = "src/main/resources/static/images/profile/";
+        // 1. 저장 경로를 절대 경로로 안전하게 잡기
+        String projectPath = System.getProperty("user.dir"); // 프로젝트 루트 (C:\Users\...\blog)
+        Path imageFilePath = Paths.get(projectPath + "/src/main/resources/static/images/profile/" + imageFileName);
         
-        // 폴더가 없으면 생성
-        File folder = new File(uploadFolder);
-        if(!folder.exists()) folder.mkdirs();
+        // 2. 폴더가 없으면 만들기 (안전장치)
+        File folder = imageFilePath.getParent().toFile();
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
 
-        Path imageFilePath = Paths.get(uploadFolder + imageFileName);
-        
         try {
-            Files.write(imageFilePath, image.getBytes()); // 파일 저장
+            Files.write(imageFilePath, image.getBytes()); // 3. 파일 저장
         } catch (Exception e) {
             e.printStackTrace();
+            return new ResponseDto<>(HttpStatus.BAD_REQUEST.value(), "파일 저장 실패");
         }
         
-        // DB 업데이트
+        // 4. DB 업데이트 (변경된 파일명으로)
         User user = principal.getUser();
-        user.setProfileUrl("/images/profile/" + imageFileName); // 웹 접근 경로로 저장
-        userService.회원수정(user); // 기존 회원수정 메서드 재활용 (Service에 setProfileUrl 로직이 있어야 함)
+        user.setProfileUrl("/images/profile/" + imageFileName); // 웹 접근 경로
+        userService.회원수정(user); 
         
-        // 세션 값 변경 (화면에 즉시 반영하기 위함)
+        // 5. 세션 값 변경 (★중요: 즉시 반영을 위해 principal 객체도 수정)
         principal.setUser(user);
         
+        // 변경된 이미지 주소 리턴
         return new ResponseDto<>(HttpStatus.OK.value(), "/images/profile/" + imageFileName);
     }
     

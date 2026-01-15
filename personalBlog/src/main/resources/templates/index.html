@@ -93,12 +93,29 @@
             </tr>
         </thead>
         <tbody>
+            <tr th:each="notice : ${notices}" class="table-secondary border-bottom border-dark fw-bold">
+                <td><span class="badge bg-danger">필독</span></td> <td><span class="badge bg-danger">공지</span></td>
+                
+                <td class="title-col">
+                    <a th:href="@{/board/{id}(id=${notice.id})}" class="text-dark text-decoration-none">
+                        <span th:text="${notice.title}">공지사항 제목</span>
+                        <span class="text-danger small" th:if="${notice.replys.size() > 0}" 
+                              th:text="'[' + ${notice.replys.size()} + ']'"></span>
+                    </a>
+                </td>
+                
+                <td th:text="${notice.user.nickname}">관리자</td>
+                <td th:text="${#dates.format(notice.createDate, 'yyyy-MM-dd')}">날짜</td>
+                <td th:text="${notice.count}">0</td>
+                <td th:text="${notice.loves.size()}">0</td>
+            </tr>
             <tr th:each="post : ${posts.content}">
                 <td th:text="${post.id}">1</td>
                 
-                <td>
-                    <span class="badge bg-light" th:text="${post.boardType}">일상</span>
-                </td>
+				<td>
+				    <th:block th:switch="${post.boardType.name()}">
+				        <span th:case="'NOTICE'"  class="badge bg-danger">공지</span>    <span th:case="'DEV'"     class="badge bg-primary">개발</span>   <span th:case="'QNA'"     class="badge bg-warning text-dark">질문</span> <span th:case="'GALLERY'" class="badge bg-info text-dark">자료</span>    <span th:case="*"         class="badge bg-success">일상</span>   </th:block>
+				</td>
                 
                 <td class="title-col">
                     <a th:href="@{/board/{id}(id=${post.id})}">

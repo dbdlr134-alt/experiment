@@ -55,7 +55,16 @@
     <input type="hidden" id="boardId" th:value="${post.id}">
 
     <div class="post-header">
-        <div class="post-category" th:text="'[' + ${post.boardType} + ']'">[일상]</div>
+        <div class="post-category mb-2">
+            <th:block th:switch="${post.boardType.name()}">
+                <span th:case="'NOTICE'"  class="badge bg-danger">공지</span>
+                <span th:case="'DEV'"     class="badge bg-primary">개발</span>
+                <span th:case="'QNA'"     class="badge bg-warning text-dark">질문</span>
+                <span th:case="'GALLERY'" class="badge bg-info text-dark">자료</span>
+                <span th:case="*"         class="badge bg-success">일상</span>
+            </th:block>
+        </div>
+
         <h2 class="post-title" th:text="${post.title}">게시글 제목이 들어갑니다.</h2>
         
         <div class="post-meta">
@@ -77,13 +86,13 @@
         </div>
     </div>
 
-    <div class="post-footer">
-        <a href="/" class="btn btn-secondary rounded-pill px-4">목록으로</a>
+	<div class="post-footer d-flex justify-content-end gap-2">
+        <a href="/" class="btn btn-secondary rounded-pill px-4">목록</a>
 
-        <div th:if="${post.user.username == #authentication.name}">
-            <a th:href="@{/board/{id}/updateForm(id=${post.id})}" class="btn btn-outline-secondary btn-sm rounded-pill me-1">수정</a>
-            <button id="btn-delete" class="btn btn-outline-danger btn-sm rounded-pill">삭제</button>
-        </div>
+        <th:block th:if="${post.user.username == #authentication.name}">
+            <a th:href="@{/board/{id}/updateForm(id=${post.id})}" class="btn btn-outline-secondary rounded-pill px-4">수정</a>
+            <button id="btn-delete" class="btn btn-outline-danger rounded-pill px-4">삭제</button>
+        </th:block>
     </div>
 
     <div class="comment-section">

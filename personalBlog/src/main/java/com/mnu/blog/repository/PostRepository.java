@@ -1,10 +1,13 @@
 package com.mnu.blog.repository;
 
-import com.mnu.blog.domain.BoardType;
-import com.mnu.blog.domain.Post;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.mnu.blog.domain.BoardType;
+import com.mnu.blog.domain.Post;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
     
@@ -16,4 +19,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     // 3. 카테고리 안에서 검색하기 ★ 추가
     Page<Post> findByBoardTypeAndTitleContainingOrContentContaining(BoardType boardType, String title, String content, Pageable pageable);
+
+ // ★ [추가] 최신 공지사항 3개만 가져오기
+    List<Post> findTop3ByBoardTypeOrderByIdDesc(BoardType boardType);
 }

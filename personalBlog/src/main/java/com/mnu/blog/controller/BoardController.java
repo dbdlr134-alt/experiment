@@ -21,12 +21,18 @@ public class BoardController {
     private final BoardService boardService;
 
     // 메인 페이지
+ // 메인 페이지
     @GetMapping({"", "/"})
     public String index(Model model, 
                         @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
                         @RequestParam(value = "search", required = false) String search,
                         @RequestParam(value = "category", required = false) String category) {
         
+        // ★ [추가] 카테고리가 '전체(ALL)'거나 없을 때만 상단 공지사항을 띄웁니다.
+        if (category == null || category.equals("ALL") || category.isEmpty()) {
+            model.addAttribute("notices", boardService.메인공지사항());
+        }
+
         model.addAttribute("posts", boardService.글목록(pageable, search, category));
         model.addAttribute("search", search);
         model.addAttribute("category", category);

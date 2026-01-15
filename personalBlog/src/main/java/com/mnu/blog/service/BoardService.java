@@ -1,14 +1,24 @@
 package com.mnu.blog.service;
 
-import com.mnu.blog.domain.*; // BoardType, Role 등 import
-import com.mnu.blog.repository.LoveRepository;
-import com.mnu.blog.repository.PostRepository;
-import com.mnu.blog.repository.ReplyRepository;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+// BoardType, Role 등 import
+import com.mnu.blog.domain.BoardType;
+import com.mnu.blog.domain.Love;
+import com.mnu.blog.domain.Post;
+import com.mnu.blog.domain.Reply;
+import com.mnu.blog.domain.Role;
+import com.mnu.blog.domain.User;
+import com.mnu.blog.repository.LoveRepository;
+import com.mnu.blog.repository.PostRepository;
+import com.mnu.blog.repository.ReplyRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -108,5 +118,11 @@ public class BoardService {
             loveRepository.save(love);
             return true;
         }
+    }
+    
+ // ★ [추가] 메인 화면용 공지사항 목록 가져오기
+    @Transactional(readOnly = true)
+    public List<Post> 메인공지사항() {
+        return postRepository.findTop3ByBoardTypeOrderByIdDesc(BoardType.NOTICE);
     }
 }

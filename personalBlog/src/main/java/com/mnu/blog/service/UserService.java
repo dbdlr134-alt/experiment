@@ -98,22 +98,29 @@ public class UserService {
 
     @Transactional
     public void 회원수정(User user) {
+        // 1. 영속화 (DB에서 기존 회원 정보 가져오기)
         User persistance = userRepository.findById(user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("회원 찾기 실패"));
 
-        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            String rawPassword = user.getPassword();
+        // 2. 비밀번호 수정 로직 (★이 부분을 수정하세요)
+        String rawPassword = user.getPassword();
+        
+        // 유효성 검사: null이 아니고, 빈 문자열이 아니고, 공백만 있는 것도 아닌 경우에만 수정
+        if (rawPassword != null && !rawPassword.trim().isEmpty()) {
             String encPassword = encoder.encode(rawPassword);
             persistance.setPassword(encPassword);
         }
 
+        // 3. 나머지 정보 수정
         persistance.setNickname(user.getNickname());
         persistance.setPhoneNumber(user.getPhoneNumber());
         
-        // ★ [추가] 프로필 사진 변경
+        // 프로필 사진 변경
         if(user.getProfileUrl() != null) {
             persistance.setProfileUrl(user.getProfileUrl());
         }
+        
+        // @Transactional이 걸려있으므로 함수 종료 시 자동 커밋 (더티 체킹)
     }
     
  // (관리자용) 전체 회원 목록 가져오기
