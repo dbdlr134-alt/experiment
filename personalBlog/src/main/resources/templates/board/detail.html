@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>글 상세보기</title>
+    <title>記事詳細</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="/css/style.css" rel="stylesheet">
@@ -12,7 +12,7 @@
 
 <header class="blog-header" onclick="location.href='/'" style="height: 200px; cursor: pointer;">
     <h1 class="blog-title" style="font-size: 2.5rem;">My Coding Life</h1>
-    <p class="blog-subtitle">소소한 일상과 개발 기록을 남기는 공간</p>
+    <p class="blog-subtitle">日々の生活と開発の記録を残す場所</p>
 </header>
 
 <nav class="navbar navbar-expand-lg blog-nav sticky-top">
@@ -22,29 +22,27 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="/">ホーム</a></li>
             </ul>
             
             <ul class="navbar-nav ms-auto align-items-center">
-                
-                <li class="nav-item" sec:authorize="isAnonymous()"><a class="nav-link" href="/auth/loginForm">로그인</a></li>
-                <li class="nav-item" sec:authorize="isAnonymous()"><a class="nav-link" href="/auth/joinForm">회원가입</a></li>
+                <li class="nav-item" sec:authorize="isAnonymous()"><a class="nav-link" href="/auth/loginForm">ログイン</a></li>
+                <li class="nav-item" sec:authorize="isAnonymous()"><a class="nav-link" href="/auth/joinForm">新規登録</a></li>
                 
                 <li class="nav-item d-flex align-items-center" sec:authorize="isAuthenticated()">
-                    
                     <a th:if="${#authentication.principal.user.role.name() == 'ADMIN'}" 
-                       href="/admin" class="btn btn-danger btn-sm rounded-pill me-3">관리자</a>
+                       href="/admin" class="btn btn-danger btn-sm rounded-pill me-3">管理者</a>
 
                     <img th:src="${#authentication.principal.user.profileUrl != null ? #authentication.principal.user.profileUrl : 'https://dummyimage.com/40x40/dee2e6/6c757d.jpg'}"
                          class="rounded-circle me-2 border" 
                          style="width: 40px; height: 40px; object-fit: cover;">
 
                     <a href="/user/updateForm" class="text-decoration-none fw-bold text-dark me-3" 
-                       data-bs-toggle="tooltip" title="회원정보 수정">
-                       <span sec:authentication="principal.user.nickname">User</span>님
+                       data-bs-toggle="tooltip" title="会員情報編集">
+                       <span sec:authentication="principal.user.nickname">User</span>さん
                     </a>
                     
-                    <a class="btn btn-outline-secondary btn-sm rounded-pill" href="/logout">로그아웃</a>
+                    <a class="btn btn-outline-secondary btn-sm rounded-pill" href="/logout">ログアウト</a>
                 </li>
             </ul>
         </div>
@@ -57,18 +55,18 @@
     <div class="post-header">
         <div class="post-category mb-2">
             <th:block th:switch="${post.boardType.name()}">
-                <span th:case="'NOTICE'"  class="badge bg-danger">공지</span>
-                <span th:case="'DEV'"     class="badge bg-primary">개발</span>
-                <span th:case="'QNA'"     class="badge bg-warning text-dark">질문</span>
-                <span th:case="'GALLERY'" class="badge bg-info text-dark">자료</span>
-                <span th:case="*"         class="badge bg-success">일상</span>
+                <span th:case="'NOTICE'"  class="badge bg-danger">告知</span>
+                <span th:case="'DEV'"     class="badge bg-primary">開発</span>
+                <span th:case="'QNA'"     class="badge bg-warning text-dark">質問</span>
+                <span th:case="'GALLERY'" class="badge bg-info text-dark">資料</span>
+                <span th:case="*"         class="badge bg-success">日常</span>
             </th:block>
         </div>
 
-        <h2 class="post-title" th:text="${post.title}">게시글 제목이 들어갑니다.</h2>
+        <h2 class="post-title" th:text="${post.title}">記事タイトル</h2>
         
         <div class="post-meta">
-            <span><i class="bi bi-person"></i> <span th:text="${post.user.nickname}">홍길동</span></span>
+            <span><i class="bi bi-person"></i> <span th:text="${post.user.nickname}">投稿者</span></span>
             <span class="text-muted">|</span>
             <span><i class="bi bi-clock"></i> <span th:text="${#dates.format(post.createDate, 'yyyy.MM.dd HH:mm')}">2026.01.07</span></span>
             <span class="text-muted">|</span>
@@ -77,34 +75,34 @@
     </div>
 
     <div class="post-body">
-        <div th:utext="${post.content}">내용입니다.</div>
+        <div th:utext="${post.content}">記事の内容</div>
         
         <div class="text-center mt-5">
             <button id="btn-love" class="btn btn-love-custom">
-                <i class="bi bi-heart-fill"></i> 좋아요 <span th:text="${post.loves.size()}">0</span>
+                <i class="bi bi-heart-fill"></i> いいね <span th:text="${post.loves.size()}">0</span>
             </button>
         </div>
     </div>
 
-	<div class="post-footer d-flex justify-content-end gap-2">
-        <a href="/" class="btn btn-secondary rounded-pill px-4">목록</a>
+    <div class="post-footer d-flex justify-content-end gap-2">
+        <a href="/" class="btn btn-secondary rounded-pill px-4">一覧へ</a>
 
         <th:block th:if="${post.user.username == #authentication.name}">
-            <a th:href="@{/board/{id}/updateForm(id=${post.id})}" class="btn btn-outline-secondary rounded-pill px-4">수정</a>
-            <button id="btn-delete" class="btn btn-outline-danger rounded-pill px-4">삭제</button>
+            <a th:href="@{/board/{id}/updateForm(id=${post.id})}" class="btn btn-outline-secondary rounded-pill px-4">編集</a>
+            <button id="btn-delete" class="btn btn-outline-danger rounded-pill px-4">削除</button>
         </th:block>
     </div>
 
     <div class="comment-section">
-        <h5 class="fw-bold mb-3"><i class="bi bi-chat-dots"></i> 댓글 <span th:text="${post.replys.size()}">0</span></h5>
+        <h5 class="fw-bold mb-3"><i class="bi bi-chat-dots"></i> コメント <span th:text="${post.replys.size()}">0</span></h5>
         
         <ul class="list-group comment-list mb-4">
             <li class="list-group-item" th:each="reply : ${post.replys}">
                 <div class="d-flex justify-content-between">
                     <div>
-                        <strong class="me-2" th:text="${reply.user.nickname}">작성자</strong>
-                        <span class="text-muted" style="font-size: 0.8rem;" th:text="${#dates.format(reply.createDate, 'yyyy-MM-dd HH:mm')}">날짜</span>
-                        <div class="mt-1" th:text="${reply.content}" style="white-space: pre-wrap;">댓글 내용</div>
+                        <strong class="me-2" th:text="${reply.user.nickname}">投稿者</strong>
+                        <span class="text-muted" style="font-size: 0.8rem;" th:text="${#dates.format(reply.createDate, 'yyyy-MM-dd HH:mm')}">日付</span>
+                        <div class="mt-1" th:text="${reply.content}" style="white-space: pre-wrap;">コメント内容</div>
                     </div>
                     <button th:if="${reply.user.username == #authentication.name}" 
                             th:onclick="'replyDelete(' + ${post.id} + ',' + ${reply.id} + ')'" 
@@ -115,9 +113,9 @@
 
         <div class="card border-0">
             <div class="card-body p-0">
-                <textarea id="reply-content" class="form-control" rows="3" placeholder="소중한 댓글을 남겨주세요"></textarea>
+                <textarea id="reply-content" class="form-control" rows="3" placeholder="コメントを残してください"></textarea>
                 <div class="d-flex justify-content-end mt-2">
-                    <button type="button" id="btn-reply-save" class="btn btn-write-custom rounded-pill">댓글 등록</button>
+                    <button type="button" id="btn-reply-save" class="btn btn-write-custom rounded-pill">コメント投稿</button>
                 </div>
             </div>
         </div>
@@ -127,30 +125,30 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // 1. 글 삭제
+    // 1. 記事削除
     $("#btn-delete").click(function() {
         let id = $("#boardId").val(); 
-        if(!confirm("정말 삭제하시겠습니까?")) return;
+        if(!confirm("本当に削除しますか？")) return;
 
         $.ajax({
             type: "DELETE",
             url: "/api/board/" + id,
             dataType: "json"
         }).done(function(resp) {
-            alert("삭제되었습니다.");
+            alert("削除されました。");
             location.href = "/";
         }).fail(function(error) {
-            alert("삭제 실패");
+            alert("削除に失敗しました。");
         });
     });
 
-    // 2. 댓글 작성
+    // 2. コメント作成
     $("#btn-reply-save").click(function() {
         let data = { content: $("#reply-content").val() };
         let boardId = $("#boardId").val();
 
         if(data.content.trim() === "") {
-            alert("댓글 내용을 입력해주세요.");
+            alert("コメントを入力してください。");
             return;
         }
 
@@ -163,14 +161,14 @@
         }).done(function(resp) {
             location.reload();
         }).fail(function(error) {
-            alert("로그인이 필요합니다");
+            alert("ログインが必要です。");
             location.href = "/auth/loginForm";
         });
     });
 
-    // 3. 댓글 삭제
+    // 3. コメント削除
     function replyDelete(boardId, replyId) {
-        if(!confirm("댓글을 삭제하시겠습니까?")) return;
+        if(!confirm("コメントを削除しますか？")) return;
         $.ajax({
             type: "DELETE",
             url: `/api/board/${boardId}/reply/${replyId}`,
@@ -178,11 +176,11 @@
         }).done(function(resp) {
             location.reload();
         }).fail(function(error) {
-            alert("댓글삭제 실패");
+            alert("コメントの削除に失敗しました。");
         });
     }
 
-    // 4. 좋아요
+    // 4. いいね
     $("#btn-love").click(function() {
         let boardId = $("#boardId").val();
         $.ajax({
@@ -192,7 +190,7 @@
         }).done(function(resp) {
             location.reload();
         }).fail(function(error) {
-            alert("로그인이 필요합니다.");
+            alert("ログインが必要です。");
             location.href = "/auth/loginForm";
         });
     });

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>회원가입</title>
+    <title>新規会員登録</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="/css/style.css" rel="stylesheet">
@@ -12,7 +12,7 @@
 
 <header class="blog-header" onclick="location.href='/'" style="height: 200px; cursor: pointer;">
     <h1 class="blog-title" style="font-size: 2.5rem;">My Coding Life</h1>
-    <p class="blog-subtitle">소소한 일상과 개발 기록을 남기는 공간</p>
+    <p class="blog-subtitle">日々の生活と開発の記録を残す場所</p>
 </header>
 
 <nav class="navbar navbar-expand-lg blog-nav sticky-top">
@@ -22,10 +22,10 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="/">ホーム</a></li>
             </ul>
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="/auth/loginForm">로그인</a></li>
+                <li class="nav-item"><a class="nav-link" href="/auth/loginForm">ログイン</a></li>
             </ul>
         </div>
     </div>
@@ -33,48 +33,48 @@
 
 <div class="container main-box" style="max-width: 600px;"> 
     <div class="board-toolbar justify-content-center border-bottom-0 mb-4">
-        <h3 class="fw-bold text-dark" style="color: #5a4a42 !important;">👤 회원가입</h3>
+        <h3 class="fw-bold text-dark" style="color: #5a4a42 !important;">👤 新規会員登録</h3>
     </div>
 
     <form>
         <div class="mb-3">
-            <label class="form-label fw-bold text-secondary">아이디</label>
+            <label class="form-label fw-bold text-secondary">ユーザーID</label>
             <div class="input-group">
-                <input type="text" id="username" class="form-control" placeholder="4자 이상 입력하세요">
-                <button type="button" class="btn btn-outline-secondary" onclick="checkUsername()">중복확인</button>
+                <input type="text" id="username" class="form-control" placeholder="4文字以上で入力してください">
+                <button type="button" class="btn btn-outline-secondary" onclick="checkUsername()">重複確認</button>
             </div>
             <span id="usernameCheckRes" class="text-danger" style="font-size:12px; margin-left: 5px;"></span>
             <input type="hidden" id="usernameValid" value="false">
         </div>
 
         <div class="mb-3">
-            <label class="form-label fw-bold text-secondary">비밀번호</label>
-            <input type="password" id="password" class="form-control" placeholder="8자 이상, 영문+숫자+특수문자">
+            <label class="form-label fw-bold text-secondary">パスワード</label>
+            <input type="password" id="password" class="form-control" placeholder="8文字以上（英数字・記号）">
         </div>
 
-		<div class="mb-3">
-            <label class="form-label fw-bold text-secondary">닉네임</label>
+        <div class="mb-3">
+            <label class="form-label fw-bold text-secondary">ニックネーム</label>
             <div class="input-group">
-                <input type="text" id="nickname" class="form-control" placeholder="닉네임을 입력하세요">
-                <button type="button" class="btn btn-outline-secondary" onclick="checkNickname()">중복확인</button>
+                <input type="text" id="nickname" class="form-control" placeholder="ニックネームを入力してください">
+                <button type="button" class="btn btn-outline-secondary" onclick="checkNickname()">重複確認</button>
             </div>
             <span id="nicknameCheckRes" class="text-danger" style="font-size:12px; margin-left: 5px;"></span>
             <input type="hidden" id="nicknameValid" value="false">
         </div>
 
         <div class="mb-3">
-            <label class="form-label fw-bold text-secondary">전화번호</label>
+            <label class="form-label fw-bold text-secondary">電話番号</label>
             <div class="input-group">
-                <input type="text" id="phoneNumber" class="form-control" placeholder="01012345678 (숫자만 입력)">
-                <button type="button" class="btn btn-outline-secondary" onclick="sendSms()">인증번호 전송</button>
+                <input type="text" id="phoneNumber" class="form-control" placeholder="09012345678（数字のみ入力）">
+                <button type="button" class="btn btn-outline-secondary" onclick="sendSms()">認証番号を送信</button>
             </div>
         </div>
 
         <div class="mb-4" id="verifyBox" style="display:none;">
-            <label class="form-label fw-bold text-secondary">인증번호 입력</label>
+            <label class="form-label fw-bold text-secondary">認証番号の入力</label>
             <div class="input-group">
-                <input type="text" id="verifyCode" class="form-control" placeholder="전송된 4자리 번호">
-                <button type="button" class="btn btn-outline-primary" onclick="checkSms()">확인</button>
+                <input type="text" id="verifyCode" class="form-control" placeholder="送信された4桁の番号">
+                <button type="button" class="btn btn-outline-primary" onclick="checkSms()">確認</button>
             </div>
             <input type="hidden" id="phoneValid" value="false">
         </div>
@@ -82,28 +82,28 @@
         <hr class="my-4">
 
         <div class="mb-3">
-            <label class="form-label fw-bold text-dark">개인정보 수집 및 이용 동의 (필수)</label>
+            <label class="form-label fw-bold text-dark">個人情報の収集および利用への同意（必須）</label>
             <textarea class="form-control bg-light" rows="4" style="font-size: 0.85rem; resize: none;" readonly>
-1. 수집하는 개인정보 항목
-   - 필수항목: 아이디, 비밀번호, 닉네임, 휴대전화 번호
+1. 収集する個人情報の項目
+   - 必須項目: ユーザーID、パスワード、ニックネーム、電話番号
 
-2. 개인정보의 수집 및 이용 목적
-   - 회원 식별 및 본인 확인
-   - 서비스 이용에 따른 공지사항 전달 및 불만 처리
-   - 부정 가입 방지 및 비인가 사용 방지
+2. 個人情報の収集および利用目的
+   - 会員識別および本人確認
+   - サービス利用に伴うお知らせの通知およびお問い合わせ対応
+   - 不正登録の防止および非認可使用の防止
 
-3. 개인정보의 보유 및 이용 기간
-   - 회원 탈퇴 시까지 보유합니다.
-   - 단, 관계 법령에 의하여 보존할 필요가 있는 경우 해당 기간 동안 보관합니다.
+3. 個人情報の保有および利用期間
+   - 会員退会時まで保有します。
+   - ただし、関係法令により保存の必要がある場合は、当該期間中保管します。
             </textarea>
             <div class="form-check mt-2">
                 <input type="checkbox" class="form-check-input" id="agreeTerms">
-                <label class="form-check-label" for="agreeTerms">위 약관에 동의합니다.</label>
+                <label class="form-check-label" for="agreeTerms">規約に同意します。</label>
             </div>
         </div>
 
         <div class="d-grid gap-2 mt-4">
-            <button type="button" onclick="join()" class="btn btn-write-custom rounded-pill py-2 fs-5">가입완료</button>
+            <button type="button" onclick="join()" class="btn btn-write-custom rounded-pill py-2 fs-5">登録を完了する</button>
         </div>
     </form>
 
@@ -112,52 +112,51 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // 1. 아이디 중복 체크
+    // 1. ユーザーIDの重複チェック
     function checkUsername() {
         let username = $("#username").val();
         if(username.trim().length < 4) {
-             $("#usernameCheckRes").text("아이디는 4자 이상이어야 합니다.").removeClass("text-success").addClass("text-danger");
+             $("#usernameCheckRes").text("ユーザーIDは4文字以上で入力してください。").removeClass("text-success").addClass("text-danger");
              return;
         }
 
         $.get("/api/check-username?username=" + username, function(res) {
-            if(res.data) { // true면 중복
-                $("#usernameCheckRes").text("이미 존재하는 아이디입니다.").removeClass("text-success").addClass("text-danger");
+            if(res.data) { 
+                $("#usernameCheckRes").text("既に存在しているユーザーIDです。").removeClass("text-success").addClass("text-danger");
                 $("#usernameValid").val("false");
             } else {
-                $("#usernameCheckRes").text("사용 가능한 아이디입니다.").removeClass("text-danger").addClass("text-success");
+                $("#usernameCheckRes").text("使用可能なユーザーIDです。").removeClass("text-danger").addClass("text-success");
                 $("#usernameValid").val("true");
             }
         });
     }
     
- // ★ 1-2. 닉네임 중복 체크
+    // 1-2. ニックネームの重複チェック
     function checkNickname() {
         let nickname = $("#nickname").val();
         if(nickname.trim().length < 1) {
-             $("#nicknameCheckRes").text("닉네임을 입력해주세요.").removeClass("text-success").addClass("text-danger");
+             $("#nicknameCheckRes").text("ニックネームを入力してください。").removeClass("text-success").addClass("text-danger");
              return;
         }
 
         $.get("/api/check-nickname?nickname=" + nickname, function(res) {
-            if(res.data) { // true면 중복
-                $("#nicknameCheckRes").text("이미 존재하는 닉네임입니다.").removeClass("text-success").addClass("text-danger");
+            if(res.data) {
+                $("#nicknameCheckRes").text("既に存在しているニックネームです。").removeClass("text-success").addClass("text-danger");
                 $("#nicknameValid").val("false");
             } else {
-                $("#nicknameCheckRes").text("사용 가능한 닉네임입니다.").removeClass("text-danger").addClass("text-success");
+                $("#nicknameCheckRes").text("使用可能なニックネームです。").removeClass("text-danger").addClass("text-success");
                 $("#nicknameValid").val("true");
             }
         });
     }
 
-    // 2. 문자 발송
+    // 2. 認証番号送信
     function sendSms() {
         let phoneNumber = $("#phoneNumber").val();
-        if(!phoneNumber) { alert("전화번호를 입력하세요."); return; }
+        if(!phoneNumber) { alert("電話番号を入力してください。"); return; }
         
-        // 버튼 비활성화 (중복 클릭 방지)
         let $btn = $(event.target);
-        $btn.prop("disabled", true).text("전송중...");
+        $btn.prop("disabled", true).text("送信中...");
 
         $.ajax({
             type: "POST",
@@ -165,18 +164,18 @@
             contentType: "application/json",
             data: JSON.stringify({phoneNumber: phoneNumber}),
             success: function(res) {
-                alert("인증번호가 발송되었습니다.");
-                $("#verifyBox").fadeIn(); // 부드럽게 나타나게
-                $btn.prop("disabled", false).text("재전송");
+                alert("認証番号を送信しました。");
+                $("#verifyBox").fadeIn();
+                $btn.prop("disabled", false).text("再送信");
             },
             error: function(err) { 
-                alert("문자 발송 실패. 번호를 확인해주세요."); 
-                $btn.prop("disabled", false).text("인증번호 전송");
+                alert("送信に失敗しました。番号を確認してください。"); 
+                $btn.prop("disabled", false).text("認証番号を送信");
             }
         });
     }
 
-    // 3. 인증번호 확인
+    // 3. 認証番号確認
     function checkSms() {
         let phoneNumber = $("#phoneNumber").val();
         let code = $("#verifyCode").val();
@@ -188,32 +187,27 @@
             data: JSON.stringify({phoneNumber: phoneNumber, code: code}),
             success: function(res) {
                 if(res.data) {
-                    alert("인증되었습니다.");
+                    alert("認証されました。");
                     $("#phoneValid").val("true");
-                    // 수정 못하게 막기
                     $("#phoneNumber").prop("readonly", true);
                     $("#verifyCode").prop("readonly", true);
-                    $("#verifyBox button").prop("disabled", true).text("완료");
+                    $("#verifyBox button").prop("disabled", true).text("完了");
                 } else {
-                    alert("인증번호가 틀렸습니다.");
+                    alert("認証番号が一致しません。");
                 }
             }
         });
     }
 
- // 4. 회원가입 요청 (수정됨)
+    // 4. 会員登録リクエスト
     function join() {
-        // 유효성 검사
-        if($("#usernameValid").val() !== "true") { alert("아이디 중복확인을 해주세요."); return; }
-        if($("#password").val().length < 4) { alert("비밀번호를 입력해주세요."); return; }
-        
-        // ★ [추가] 닉네임 중복확인 검사
-        if($("#nicknameValid").val() !== "true") { alert("닉네임 중복확인을 해주세요."); return; }
-        
-        if($("#phoneValid").val() !== "true") { alert("전화번호 인증을 완료해주세요."); return; }
+        if($("#usernameValid").val() !== "true") { alert("ユーザーIDの重複確認を行ってください。"); return; }
+        if($("#password").val().length < 4) { alert("パスワードを入力してください。"); return; }
+        if($("#nicknameValid").val() !== "true") { alert("ニックネームの重複확인を行ってください。"); return; }
+        if($("#phoneValid").val() !== "true") { alert("電話番号の認証を完了してください。"); return; }
         
         if(!$("#agreeTerms").is(":checked")) { 
-            alert("개인정보 수집 및 이용 약관에 동의해주세요."); 
+            alert("利用規約に同意してください。"); 
             $("#agreeTerms").focus();
             return; 
         }
@@ -232,15 +226,14 @@
             data: JSON.stringify(data),
             success: function(res) {
                 if(res.status === 200) {
-                    alert("회원가입이 완료되었습니다! 로그인 해주세요.");
+                    alert("会員登録が完了しました！ログインしてください。");
                     location.href = "/auth/loginForm";
                 } else {
                     alert(res.data); 
                 }
             },
             error: function(err) {
-                console.log(err);
-                alert("회원가입 중 오류가 발생했습니다.");
+                alert("登録中にエラーが発生しました。");
             }
         });
     }

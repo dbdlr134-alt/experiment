@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ja">
 <head>
     <meta charset="UTF-8">
     <title>My Coding Life</title>
@@ -11,7 +11,7 @@
 
 <header class="blog-header" onclick="location.href='/'" style="height: 200px; cursor: pointer;">
     <h1 class="blog-title" style="font-size: 2.5rem;">My Coding Life</h1>
-    <p class="blog-subtitle">소소한 일상과 개발 기록을 남기는 공간</p>
+    <p class="blog-subtitle">日々の生活と開発の記録を残す場所</p>
 </header>
 
 <nav class="navbar navbar-expand-lg blog-nav sticky-top">
@@ -21,29 +21,27 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="/">ホーム</a></li>
             </ul>
             
             <ul class="navbar-nav ms-auto align-items-center">
-                
-                <li class="nav-item" sec:authorize="isAnonymous()"><a class="nav-link" href="/auth/loginForm">로그인</a></li>
-                <li class="nav-item" sec:authorize="isAnonymous()"><a class="nav-link" href="/auth/joinForm">회원가입</a></li>
+                <li class="nav-item" sec:authorize="isAnonymous()"><a class="nav-link" href="/auth/loginForm">ログイン</a></li>
+                <li class="nav-item" sec:authorize="isAnonymous()"><a class="nav-link" href="/auth/joinForm">新規登録</a></li>
                 
                 <li class="nav-item d-flex align-items-center" sec:authorize="isAuthenticated()">
-                    
                     <a th:if="${#authentication.principal.user.role.name() == 'ADMIN'}" 
-                       href="/admin" class="btn btn-danger btn-sm rounded-pill me-3">관리자</a>
+                       href="/admin" class="btn btn-danger btn-sm rounded-pill me-3">管理者</a>
 
                     <img th:src="${#authentication.principal.user.profileUrl != null ? #authentication.principal.user.profileUrl : 'https://dummyimage.com/40x40/dee2e6/6c757d.jpg'}"
                          class="rounded-circle me-2 border" 
                          style="width: 40px; height: 40px; object-fit: cover;">
 
                     <a href="/user/updateForm" class="text-decoration-none fw-bold text-dark me-3" 
-                       data-bs-toggle="tooltip" title="회원정보 수정">
-                       <span sec:authentication="principal.user.nickname">User</span>님
+                       data-bs-toggle="tooltip" title="会員情報編集">
+                       <span sec:authentication="principal.user.nickname">User</span>さん
                     </a>
                     
-                    <a class="btn btn-outline-secondary btn-sm rounded-pill" href="/logout">로그아웃</a>
+                    <a class="btn btn-outline-secondary btn-sm rounded-pill" href="/logout">ログアウト</a>
                 </li>
             </ul>
         </div>
@@ -55,26 +53,26 @@
     <div class="board-toolbar">
         <div class="category-filter">
             <a th:href="@{/(category='ALL')}" 
-               th:classappend="${category == null || category == 'ALL'} ? 'active'">전체글</a>
+               th:classappend="${category == null || category == 'ALL'} ? 'active'">すべて</a>
                
             <a th:href="@{/(category='DAILY')}" 
-               th:classappend="${category == 'DAILY'} ? 'active'">일상</a>
+               th:classappend="${category == 'DAILY'} ? 'active'">日常</a>
                
             <a th:href="@{/(category='DEV')}" 
-               th:classappend="${category == 'DEV'} ? 'active'">개발기록</a>
+               th:classappend="${category == 'DEV'} ? 'active'">開発記録</a>
                
             <a th:href="@{/(category='NOTICE')}" 
-               th:classappend="${category == 'NOTICE'} ? 'active'">공지사항</a>
+               th:classappend="${category == 'NOTICE'} ? 'active'">お知らせ</a>
                
             <a th:href="@{/(category='QNA')}" 
-               th:classappend="${category == 'QNA'} ? 'active'">QnA</a>
+               th:classappend="${category == 'QNA'} ? 'active'">Q&A</a>
                
             <a th:href="@{/(category='GALLERY')}" 
-               th:classappend="${category == 'GALLERY'} ? 'active'">자료실</a>
+               th:classappend="${category == 'GALLERY'} ? 'active'">ライブラリ</a>
         </div>
 
         <a sec:authorize="isAuthenticated()" href="/board/saveForm" class="btn btn-write-custom">
-            <i class="bi bi-pencil-fill"></i> 글쓰기
+            <i class="bi bi-pencil-fill"></i> 投稿する
         </a>
     </div>
 
@@ -83,29 +81,29 @@
             <col style="width: 8%;">  <col style="width: 10%;"> <col style="width: auto;"> <col style="width: 12%;"> <col style="width: 12%;"> <col style="width: 8%;">  <col style="width: 8%;">  </colgroup>
         <thead>
             <tr>
-                <th>번호</th>
-                <th>말머리</th>
-                <th>제목</th>
-                <th>글쓴이</th>
-                <th>작성일</th>
-                <th>조회</th>
-                <th>추천</th>
+                <th>No.</th>
+                <th>カテゴリ</th>
+                <th>タイトル</th>
+                <th>投稿者</th>
+                <th>作成日</th>
+                <th>閲覧</th>
+                <th>いいね</th>
             </tr>
         </thead>
         <tbody>
             <tr th:each="notice : ${notices}" class="table-secondary border-bottom border-dark fw-bold">
-                <td><span class="badge bg-danger">필독</span></td> <td><span class="badge bg-danger">공지</span></td>
+                <td><span class="badge bg-danger">必読</span></td> <td><span class="badge bg-danger">告知</span></td>
                 
                 <td class="title-col">
                     <a th:href="@{/board/{id}(id=${notice.id})}" class="text-dark text-decoration-none">
-                        <span th:text="${notice.title}">공지사항 제목</span>
+                        <span th:text="${notice.title}">お知らせのタイトル</span>
                         <span class="text-danger small" th:if="${notice.replys.size() > 0}" 
                               th:text="'[' + ${notice.replys.size()} + ']'"></span>
                     </a>
                 </td>
                 
-                <td th:text="${notice.user.nickname}">관리자</td>
-                <td th:text="${#dates.format(notice.createDate, 'yyyy-MM-dd')}">날짜</td>
+                <td th:text="${notice.user.nickname}">管理者</td>
+                <td th:text="${#dates.format(notice.createDate, 'yyyy-MM-dd')}">日付</td>
                 <td th:text="${notice.count}">0</td>
                 <td th:text="${notice.loves.size()}">0</td>
             </tr>
@@ -114,29 +112,31 @@
                 
 				<td>
 				    <th:block th:switch="${post.boardType.name()}">
-				        <span th:case="'NOTICE'"  class="badge bg-danger">공지</span>    <span th:case="'DEV'"     class="badge bg-primary">개발</span>   <span th:case="'QNA'"     class="badge bg-warning text-dark">질문</span> <span th:case="'GALLERY'" class="badge bg-info text-dark">자료</span>    <span th:case="*"         class="badge bg-success">일상</span>   </th:block>
+				        <span th:case="'NOTICE'"  class="badge bg-danger">告知</span>
+                        <span th:case="'DEV'"     class="badge bg-primary">開発</span>
+                        <span th:case="'QNA'"     class="badge bg-warning text-dark">質問</span>
+                        <span th:case="'GALLERY'" class="badge bg-info text-dark">資料</span>
+                        <span th:case="*"         class="badge bg-success">日常</span>
+                    </th:block>
 				</td>
                 
                 <td class="title-col">
                     <a th:href="@{/board/{id}(id=${post.id})}">
-                        <span th:text="${post.title}">게시글 제목입니다.</span>
+                        <span th:text="${post.title}">記事のタイトルです。</span>
                         <span class="comment-cnt" th:if="${post.replys.size() > 0}" 
                               th:text="'[' + ${post.replys.size()} + ']'">[0]</span>
                     </a>
                 </td>
                 
-                <td th:text="${post.user.nickname}">홍길동</td>
-                
+                <td th:text="${post.user.nickname}">ニックネーム</td>
                 <td th:text="${#dates.format(post.createDate, 'yyyy-MM-dd')}">2026-01-07</td>
-                
                 <td th:text="${post.count}">0</td>
-                
                 <td th:text="${post.loves.size()}">0</td>
             </tr>
             
             <tr th:if="${posts.empty}">
                 <td colspan="7" class="py-5 text-center text-muted">
-                    등록된 게시글이 없습니다. 첫 글을 작성해보세요!
+                    投稿された 記事がありません。最初の記事を書いてみませんか？
                 </td>
             </tr>
         </tbody>
@@ -145,10 +145,9 @@
     <div class="search-box">
         <form class="d-flex" method="GET" action="/">
             <input type="hidden" name="category" th:value="${category}">
-            
             <input class="form-control" type="search" name="search" 
-                   placeholder="검색어 입력" th:value="${search}" style="width: 250px;">
-            <button class="btn btn-secondary ms-2" type="submit">검색</button>
+                   placeholder="キーワードを入力" th:value="${search}" style="width: 250px;">
+            <button class="btn btn-secondary ms-2" type="submit">検索</button>
         </form>
     </div>
 
@@ -156,12 +155,11 @@
         <ul class="pagination justify-content-center">
             <li class="page-item" th:classappend="${posts.first} ? 'disabled'">
                 <a class="page-link" 
-                   th:href="@{/(page=${posts.number - 1}, search=${search}, category=${category})}">이전</a>
+                   th:href="@{/(page=${posts.number - 1}, search=${search}, category=${category})}">前へ</a>
             </li>
-            
             <li class="page-item" th:classappend="${posts.last} ? 'disabled'">
                 <a class="page-link" 
-                   th:href="@{/(page=${posts.number + 1}, search=${search}, category=${category})}">다음</a>
+                   th:href="@{/(page=${posts.number + 1}, search=${search}, category=${category})}">次へ</a>
             </li>
         </ul>
     </div>
